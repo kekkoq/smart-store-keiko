@@ -8,9 +8,9 @@
 
 site_name: Professional Analytics Project
 site_url: https://denisecase.github.io/pro-analytics-02-starter/
-repo_url: https://github.com/denisecase/pro-analytics-02-starter
+repo_url: https://github.com/kekkoq/smart-store-keiko
 site_description: Professional Python project demonstrating industry best practices
-site_author: Denise Case
+site_author: Keiko Shiozaki
 docs_dir: docs
 site_dir: site
 

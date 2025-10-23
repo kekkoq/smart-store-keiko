@@ -2,7 +2,7 @@
 
 > Use this repo to start a professional Python project.
 
-- Additional information: <https://github.com/denisecase/pro-analytics-02>
+- Additional information: <https://github.com/kekkoq/smart-store-keiko>
 - Project organization: [STRUCTURE](./STRUCTURE.md)
 - Build professional skills:
   - **Environment Management**: Every project in isolation
@@ -166,5 +166,23 @@ With a working version safe in GitHub, start making changes to the code.
 Before starting a new session, remember to do a `git pull` and keep your tools updated.
 
 Each time forward progress is made, remember to git add-commit-push.
+
+1. Environmental Setup:
+
+  If .venv is deleted.
+  adding a new package.
+  creating a new project.
+
+uv venv
+uv pip install -r requirements.txt
+
+2. Running Python:
+
+   uv run python -m analytics_project.<module_name>
+
+3. Running test:
+
+$env:PYTHONPATH = "$PWD/src"
+pytest --cov=src --cov-report=term-missing
 
 
