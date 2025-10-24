@@ -1,6 +1,15 @@
-# Pro Analytics 02 Python Starter Repository
+#  context
 
-> Use this repo to start a professional Python project.
+This project was developed as part of a course on data-driven decision making, with a focus on building scalable analytics workflows using modern data tools and architectures. The goal is to simulate a real-world business scenario where raw operational data must be transformed into actionable insights through a structured pipeline.
+The project emphasizes key concepts in:
+
+- ETL (Extract, Transform, Load): Designing repeatable data ingestion and transformation flows
+- Data Warehousing: Structuring data for efficient querying and historical analysis
+- OLAP (Online Analytical Processing): Enabling multidimensional analysis for strategic decision support
+- Power BI: Visualizing KPIs and trends to inform business stakeholders
+- Apache Spark: Exploring distributed data processing for large-scale transformation tasks
+
+It introduces reproducible environment management using uv, ensuring consistency across development and deployment.
 
 - Additional information: <https://github.com/kekkoq/smart-store-keiko>
 - Project organization: [STRUCTURE](./STRUCTURE.md)
