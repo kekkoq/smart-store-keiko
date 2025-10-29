@@ -97,10 +97,9 @@ def init_logger(
             enqueue=True,
             backtrace=True,
             diagnose=False,
-            rotation="10 MB",
-            retention="7 days",
             encoding="utf-8",
             format=fmt,
+            mode="w",  # overwrite log file on each run
         )
         logger.info(f"Logging to file: {log_file.resolve()}")
         _is_configured = True
