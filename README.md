@@ -81,17 +81,19 @@ This mirrors real work where we typically:
 
 1. Update dependencies (for security and compatibility).
 2. Clean unused cached packages to free space.
-3. Use `git add .` to stage all changes.
-4. Run ruff and fix minor issues.
-5. Update pre-commit periodically.
-6. Run pre-commit quality checks on all code files (**twice if needed**, the first pass may fix things).
-7. Run tests.
+3. Clean up old log files to prevent clutter and keep recent context.
+4. Use `git add .` to stage all changes.
+5. Run ruff and fix minor issues.
+6. Update pre-commit periodically.
+7. Run pre-commit quality checks on all code files (**twice if needed**, the first pass may fix things).
+8. Run tests.
 
 In VS Code, open your repository, then open a terminal (Terminal / New Terminal) and run the following commands one at a time to check the code.
 
 ```shell
 uv sync --extra dev --extra docs --upgrade
 uv cache clean
+uv run python scripts/cleanup_log.py
 git add .
 uvx ruff check --fix
 uvx pre-commit autoupdate
@@ -101,6 +103,9 @@ uv run pytest
 ```
 
 NOTE: The second `git add .` ensures any automatic fixes made by Ruff or pre-commit are included before testing or committing.
+
+### Log Cleanup
+> `cleanup_log.py` deletes `.log` files older than 7 days. It helps keep the project tidy without losing recent logs.
 
 <details>
 <summary>Click to see a note on best practices</summary>
