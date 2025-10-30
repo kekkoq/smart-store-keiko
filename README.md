@@ -1,4 +1,4 @@
-#  context
+#  PROJECT OVERVIEW
 
 This project was developed as part of a course on data-driven decision making, with a focus on building scalable analytics workflows using modern data tools and architectures. The goal is to simulate a real-world business scenario where raw operational data must be transformed into actionable insights through a structured pipeline.
 The project emphasizes key concepts in:
@@ -104,8 +104,7 @@ uv run pytest
 
 NOTE: The second `git add .` ensures any automatic fixes made by Ruff or pre-commit are included before testing or committing.
 
-### Log Cleanup
-> `cleanup_log.py` deletes `.log` files older than 7 days. It helps keep the project tidy without losing recent logs.
+> **Log Cleanup:** `cleanup_log.py` deletes `.log` files older than 7 days. It helps keep the project tidy without losing recent logs.
 
 <details>
 <summary>Click to see a note on best practices</summary>
