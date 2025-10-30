@@ -115,22 +115,23 @@ For fully reproducible results, or when you need to use the local `.venv`, use `
 
 </details>
 
-### 3.3   Run the Data Preparation Script
+3.3 Run the Data Preparation Script
 
-This project uses a modular structure with relative imports, so the data_prep.py script must be run as part of the package.
-To execute the script correctly, run the following command from the root of the repository:
-
+To execute the data preparation module with relative imports, run the script as part of the package using the -m flag:
 python -m src.analytics_project.data_prep
 
-This tells Python to treat the folder as a package, allowing relative imports like:
-
+This tells Python to treat the folder as a package, enabling relative imports like:
 from .utils_logger import init_logger
 
-Tip: If you run the script directly with python src/analytics_project/data_prep.py, you'll likely see an error like
 
+Tip: Avoid running the script directly like this:
+python src/analytics_project/data_prep.py
+
+
+Doing so may result in:
 ImportError: attempted relative import with no known parent package
 
-Always use the -m flag for package-aware execution
+Always use -m for package-aware execution.
 
 ### 3.4 Build Project Documentation
 
