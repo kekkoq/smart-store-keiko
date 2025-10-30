@@ -115,7 +115,24 @@ For fully reproducible results, or when you need to use the local `.venv`, use `
 
 </details>
 
-### 3.3 Build Project Documentation
+### 3.3   Run the Data Preparation Script
+
+This project uses a modular structure with relative imports, so the data_prep.py script must be run as part of the package.
+To execute the script correctly, run the following command from the root of the repository:
+
+python -m src.analytics_project.data_prep
+
+This tells Python to treat the folder as a package, allowing relative imports like:
+
+from .utils_logger import init_logger
+
+Tip: If you run the script directly with python src/analytics_project/data_prep.py, you'll likely see an error like
+
+ImportError: attempted relative import with no known parent package
+
+Always use the -m flag for package-aware execution
+
+### 3.4 Build Project Documentation
 
 Make sure you have current doc dependencies, then build your docs, fix any errors, and serve them locally to test.
 
@@ -127,7 +144,7 @@ uv run mkdocs serve
 - After running the serve command, the local URL of the docs will be provided. To open the site, press **CTRL and click** the provided link (at the same time) to view the documentation. On a Mac, use **CMD and click**.
 - Press **CTRL c** (at the same time) to stop the hosting process.
 
-### 3.4 Execute
+### 3.5 Execute
 
 This project includes demo code.
 Run the demo Python modules to confirm everything is working.
@@ -156,7 +173,7 @@ If this works, your project is ready! If not, check:
 
 ---
 
-### 3.5 Git add-commit-push to GitHub
+### 3.6 Git add-commit-push to GitHub
 
 Anytime we make working changes to code is a good time to git add-commit-push to GitHub.
 
@@ -172,7 +189,7 @@ git push -u origin main
 
 This will trigger the GitHub Actions workflow and publish your documentation via GitHub Pages.
 
-### 3.6 Modify and Debug
+### 3.7 Modify and Debug
 
 With a working version safe in GitHub, start making changes to the code.
 
