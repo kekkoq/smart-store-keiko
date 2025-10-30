@@ -115,7 +115,7 @@ For fully reproducible results, or when you need to use the local `.venv`, use `
 
 </details>
 
-3.3 Run the Data Preparation Script
+### 3.3 Run the Data Preparation Script
 
 To execute the data preparation module with relative imports, run the script as part of the package using the -m flag:
 python -m src.analytics_project.data_prep
