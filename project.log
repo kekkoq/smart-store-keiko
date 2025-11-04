@@ -1,9 +1,9 @@
-2025-11-03 20:08:INFO    AT utils_logger.py:104: Logging to file: C:\Repos\smart-store-keiko\project.log
-2025-11-03 20:08:INFO    AT data_prep.py:121: Starting data preparation...
-2025-11-03 20:08:INFO    AT data_prep.py:32: Reading raw data from C:\Repos\smart-store-keiko\data\raw\customers_data.csv.
-2025-11-03 20:08:INFO    AT data_prep.py:35: customers_data.csv: loaded DataFrame with shape 201 rows x 6 cols
-2025-11-03 20:08:INFO    AT data_prep.py:32: Reading raw data from C:\Repos\smart-store-keiko\data\raw\products_data.csv.
-2025-11-03 20:08:INFO    AT data_prep.py:35: products_data.csv: loaded DataFrame with shape 100 rows x 6 cols
-2025-11-03 20:08:INFO    AT data_prep.py:32: Reading raw data from C:\Repos\smart-store-keiko\data\raw\sales_data.csv.
-2025-11-03 20:08:INFO    AT data_prep.py:35: sales_data.csv: loaded DataFrame with shape 2001 rows x 9 cols
-2025-11-03 20:08:INFO    AT data_prep.py:138: Data preparation complete.
+2025-11-03 20:14:INFO    AT utils_logger.py:104: Logging to file: C:\Repos\smart-store-keiko\project.log
+2025-11-03 20:14:INFO    AT data_prep.py:124: Starting data preparation...
+2025-11-03 20:14:INFO    AT data_prep.py:32: Reading raw data from C:\Repos\smart-store-keiko\data\raw\customers_data.csv.
+2025-11-03 20:14:INFO    AT data_prep.py:35: customers_data.csv: loaded DataFrame with shape 201 rows x 6 cols
+2025-11-03 20:14:INFO    AT data_prep.py:32: Reading raw data from C:\Repos\smart-store-keiko\data\raw\products_data.csv.
+2025-11-03 20:14:INFO    AT data_prep.py:35: products_data.csv: loaded DataFrame with shape 100 rows x 6 cols
+2025-11-03 20:14:INFO    AT data_prep.py:32: Reading raw data from C:\Repos\smart-store-keiko\data\raw\sales_data.csv.
+2025-11-03 20:14:INFO    AT data_prep.py:35: sales_data.csv: loaded DataFrame with shape 2001 rows x 9 cols
+2025-11-03 20:14:INFO    AT data_prep.py:141: Data preparation complete.

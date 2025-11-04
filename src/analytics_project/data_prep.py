@@ -112,7 +112,10 @@ def enrich_sales(path):
     df.loc[2, 'PaymentType_str'] = 'Bitcoin'  # unexpected category
 
     df.rename(
-        columns=lambda col: col.replace('_units', '').replace('_str', '').replace('_int', ''),
+        columns=lambda col: col.replace('_units', '')
+        .replace('_str', '')
+        .replace('_int', '')
+        .replace('_pct', ''),
         inplace=True,
     )
 
