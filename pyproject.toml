@@ -40,6 +40,7 @@ Repository = "https://github.com/kekkoq/smart-store-keiko"
 dev = [
   "pytest", # run some tests automatically
   "pytest-cov", # coverage report for more visibility
+  "pre-commit", # code quality checks before commits
 ]
 docs = [
   "mkdocs",                # Core MkDocs

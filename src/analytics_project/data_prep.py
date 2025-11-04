@@ -44,7 +44,69 @@ def read_and_log(path: pathlib.Path) -> pd.DataFrame:
         return pd.DataFrame()
 
 
-# Define a main function to start our data processing pipeline.
+import pandas as pd
+import numpy as np
+
+
+# add two new columns to each dataset
+def enrich_customers(path):
+    df = pd.read_csv(path)
+
+    df['LoyaltyPoints_int'] = np.random.randint(0, 5001, size=len(df))
+    df['EngagementStyle_str'] = np.random.choice(['Mobile', 'Desktop', 'InStore'], size=len(df))
+
+    # Inject ~5% missing values
+    df.loc[df.sample(frac=0.05).index, 'LoyaltyPoints_int'] = np.nan
+
+    # Inject false/inconsistent values
+    df.loc[0, 'EngagementStyle_str'] = 'Mobile '  # trailing space
+    df.loc[1, 'EngagementStyle_str'] = 'Kiosk'  # unexpected category
+    df.loc[2, 'LoyaltyPoints_int'] = -100  # invalid negative value
+
+    df.to_csv(path, index=False)
+    print(f"Updated {path}")
+
+
+def enrich_products(path):
+    df = pd.read_csv(path)
+
+    df['StockQuantity_units'] = np.random.randint(0, 1001, size=len(df))
+    df['SupplierName_str'] = np.random.choice(
+        ['Acme Corp', 'Global Supplies', 'Tech Distributors', 'HomeGoods Inc.'], size=len(df)
+    )
+
+    # Inject ~5% missing values
+    df.loc[df.sample(frac=0.05).index, 'StockQuantity_units'] = np.nan
+
+    # Inject false/inconsistent values
+    df.loc[0, 'StockQuantity_units'] = -50  # invalid negative value
+    df.loc[1, 'SupplierName_str'] = 'Acme Corp'  # unexpected space
+    df.loc[2, 'SupplierName_str'] = ''  # empty string
+
+    df.to_csv(path, index=False)
+    print(f"Updated {path}")
+
+
+def enrich_sales(path):
+    df = pd.read_csv(path)
+
+    df['DiscountPercent_pct'] = np.round(np.random.uniform(0, 30, size=len(df)), 2)
+    df['PaymentType_str'] = np.random.choice(
+        ['CreditCard', 'PayPal', 'WireTransfer', 'GiftCard'], size=len(df)
+    )
+
+    # Inject ~5% missing values
+    df.loc[df.sample(frac=0.05).index, 'DiscountPercent_pct'] = np.nan
+
+    # Inject false/inconsistent values
+    df.loc[0, 'DiscountPercent_pct'] = 150.0  # invalid over 100%
+    df.loc[1, 'PaymentType_str'] = 'Credit Card'  # unexpected space
+    df.loc[2, 'PaymentType_str'] = 'Bitcoin'  # unexpected category
+
+    df.to_csv(path, index=False)
+    print(f"Updated {path}")
+
+    # Define a main function to start our data processing pipeline.
 
 
 def main() -> None:
@@ -61,10 +123,14 @@ def main() -> None:
     read_and_log(product_path)
     read_and_log(sales_path)
 
+    # Enrich datasets with new columns and inject inconsistencies
+    enrich_customers(customer_path)
+    enrich_products(product_path)
+    enrich_sales(sales_path)
+
     logger.info("Data preparation complete.")
+    # Standard Python idiom to run this module as a script when executed directly.
 
-
-# Standard Python idiom to run this module as a script when executed directly.
 
 if __name__ == "__main__":
     # Initialize logger
