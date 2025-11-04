@@ -46,111 +46,87 @@ def read_and_log(path: pathlib.Path) -> pd.DataFrame:
 
 import pandas as pd
 import numpy as np
+from pathlib import Path
+import logging
+
+# Setup logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+RAW_DATA_DIR = Path("data/raw")
 
 
-# add two new columns to each dataset
+def drop_enrichment_columns(df):
+    suffixes = ('_int', '_str', '_pct', '_units')
+    cols_to_drop = [col for col in df.columns if col.endswith(suffixes)]
+    return df.drop(columns=cols_to_drop, errors='ignore')
+
+
 def enrich_customers(path):
     df = pd.read_csv(path)
+    df = drop_enrichment_columns(df)
 
-    df['LoyaltyPoints_int'] = np.random.randint(0, 5001, size=len(df))
-    df['EngagementStyle_str'] = np.random.choice(['Mobile', 'Desktop', 'InStore'], size=len(df))
+    # Add LoyaltyPoints (0–5000), inject NaN and negative
+    df['LoyaltyPoints'] = np.random.randint(0, 5001, size=len(df))
+    df.loc[df.sample(frac=0.03).index, 'LoyaltyPoints'] = np.nan
+    df.loc[0, 'LoyaltyPoints'] = -150
 
-    # Inject ~5% missing values
-    df.loc[df.sample(frac=0.05).index, 'LoyaltyPoints_int'] = np.nan
-
-    # Inject false/inconsistent values
-    df.loc[0, 'EngagementStyle_str'] = 'Mobile '  # trailing space
-    df.loc[1, 'EngagementStyle_str'] = 'Kiosk'  # unexpected category
-    df.loc[2, 'LoyaltyPoints_int'] = -100  # invalid negative value
-
-    # Clean column names by removing suffixes
-    df.rename(columns=lambda col: col.replace('_int', '').replace('_str', ''), inplace=True)
+    # Add EngagementStyle (Mobile/Desktop/InStore), inject typo and unknown
+    df['EngagementStyle'] = np.random.choice(['Mobile', 'Desktop', 'InStore'], size=len(df))
+    df.loc[df.sample(frac=0.02).index, 'EngagementStyle'] = np.nan
+    df.loc[1, 'EngagementStyle'] = 'Mobile '
+    df.loc[2, 'EngagementStyle'] = 'Kiosk'
 
     df.to_csv(path, index=False)
-    print(f"Updated {path}")
+    print(f"✅ Enriched: {path.name}")
 
 
 def enrich_products(path):
     df = pd.read_csv(path)
+    df = drop_enrichment_columns(df)
 
-    df['StockQuantity_units'] = np.random.randint(0, 1001, size=len(df))
-    df['SupplierName_str'] = np.random.choice(
-        ['Acme Corp', 'Global Supplies', 'Tech Distributors', 'HomeGoods Inc.'], size=len(df)
-    )
+    # Add StockLevel (100–1000), inject NaN and negative
+    df['StockLevel'] = np.random.randint(100, 1001, size=len(df))
+    df.loc[df.sample(frac=0.03).index, 'StockLevel'] = np.nan
+    df.loc[0, 'StockLevel'] = -50
 
-    # Inject ~5% missing values
-    df.loc[df.sample(frac=0.05).index, 'StockQuantity_units'] = np.nan
-
-    # Inject false/inconsistent values
-    df.loc[0, 'StockQuantity_units'] = -50  # invalid negative value
-    df.loc[1, 'SupplierName_str'] = 'Acme Corp'  # unexpected space
-    df.loc[2, 'SupplierName_str'] = ''  # empty string
-
-    df.rename(
-        columns=lambda col: col.replace('_units', '').replace('_str', '').replace('_int', ''),
-        inplace=True,
-    )
+    # Add SupplierTier (Basic/Preferred/Premium), inject typo and unknown
+    df['SupplierTier'] = np.random.choice(['Basic', 'Preferred', 'Premium'], size=len(df))
+    df.loc[df.sample(frac=0.02).index, 'SupplierTier'] = np.nan
+    df.loc[1, 'SupplierTier'] = 'Preferred '
+    df.loc[2, 'SupplierTier'] = 'UnknownTier'
 
     df.to_csv(path, index=False)
-    print(f"Updated {path}")
+    print(f"✅ Enriched: {path.name}")
 
 
 def enrich_sales(path):
     df = pd.read_csv(path)
+    df = drop_enrichment_columns(df)
 
-    df['DiscountPercent_pct'] = np.round(np.random.uniform(0, 30, size=len(df)), 2)
-    df['PaymentType_str'] = np.random.choice(
+    # Add DiscountPercent (0–30), inject NaN and outlier
+    df['DiscountPercent'] = np.round(np.random.uniform(0, 30, size=len(df)), 2)
+    df.loc[df.sample(frac=0.03).index, 'DiscountPercent'] = np.nan
+    df.loc[0, 'DiscountPercent'] = 150.0
+
+    # Add PaymentMethod (CreditCard/PayPal/WireTransfer/GiftCard), inject typo and unknown
+    df['PaymentMethod'] = np.random.choice(
         ['CreditCard', 'PayPal', 'WireTransfer', 'GiftCard'], size=len(df)
     )
-
-    # Inject ~5% missing values
-    df.loc[df.sample(frac=0.05).index, 'DiscountPercent_pct'] = np.nan
-
-    # Inject false/inconsistent values
-    df.loc[0, 'DiscountPercent_pct'] = 150.0  # invalid over 100%
-    df.loc[1, 'PaymentType_str'] = 'Credit Card'  # unexpected space
-    df.loc[2, 'PaymentType_str'] = 'Bitcoin'  # unexpected category
-
-    df.rename(
-        columns=lambda col: col.replace('_units', '')
-        .replace('_str', '')
-        .replace('_int', '')
-        .replace('_pct', ''),
-        inplace=True,
-    )
+    df.loc[df.sample(frac=0.02).index, 'PaymentMethod'] = np.nan
+    df.loc[1, 'PaymentMethod'] = 'Credit Card'
+    df.loc[2, 'PaymentMethod'] = 'Bitcoin'
 
     df.to_csv(path, index=False)
-    print(f"Updated {path}")
-
-    # Define a main function to start our data processing pipeline.
+    print(f"✅ Enriched: {path.name}")
 
 
-def main() -> None:
-    """Process raw data."""
-    logger.info("Starting data preparation...")
-
-    # Build explicit paths for each file under data/raw
-    customer_path = RAW_DATA_DIR.joinpath("customers_data.csv")
-    product_path = RAW_DATA_DIR.joinpath("products_data.csv")
-    sales_path = RAW_DATA_DIR.joinpath("sales_data.csv")
-
-    # Call the function once per file
-    read_and_log(customer_path)
-    read_and_log(product_path)
-    read_and_log(sales_path)
-
-    # Enrich datasets with new columns and inject inconsistencies
-    enrich_customers(customer_path)
-    enrich_products(product_path)
-    enrich_sales(sales_path)
-
-    logger.info("Data preparation complete.")
-    # Standard Python idiom to run this module as a script when executed directly.
+def main():
+    enrich_customers(RAW_DATA_DIR / "customers_data.csv")
+    enrich_products(RAW_DATA_DIR / "products_data.csv")
+    enrich_sales(RAW_DATA_DIR / "sales_data.csv")
+    logger.info("🎉 All files enriched with realistic anomalies.")
 
 
 if __name__ == "__main__":
-    # Initialize logger
-    init_logger()
-
-    # Call the main function by adding () after the function name
     main()
