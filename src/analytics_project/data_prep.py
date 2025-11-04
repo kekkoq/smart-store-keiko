@@ -63,6 +63,9 @@ def enrich_customers(path):
     df.loc[1, 'EngagementStyle_str'] = 'Kiosk'  # unexpected category
     df.loc[2, 'LoyaltyPoints_int'] = -100  # invalid negative value
 
+    # Clean column names by removing suffixes
+    df.rename(columns=lambda col: col.replace('_int', '').replace('_str', ''), inplace=True)
+
     df.to_csv(path, index=False)
     print(f"Updated {path}")
 
@@ -83,6 +86,11 @@ def enrich_products(path):
     df.loc[1, 'SupplierName_str'] = 'Acme Corp'  # unexpected space
     df.loc[2, 'SupplierName_str'] = ''  # empty string
 
+    df.rename(
+        columns=lambda col: col.replace('_units', '').replace('_str', '').replace('_int', ''),
+        inplace=True,
+    )
+
     df.to_csv(path, index=False)
     print(f"Updated {path}")
 
@@ -102,6 +110,11 @@ def enrich_sales(path):
     df.loc[0, 'DiscountPercent_pct'] = 150.0  # invalid over 100%
     df.loc[1, 'PaymentType_str'] = 'Credit Card'  # unexpected space
     df.loc[2, 'PaymentType_str'] = 'Bitcoin'  # unexpected category
+
+    df.rename(
+        columns=lambda col: col.replace('_units', '').replace('_str', '').replace('_int', ''),
+        inplace=True,
+    )
 
     df.to_csv(path, index=False)
     print(f"Updated {path}")
