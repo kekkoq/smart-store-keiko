@@ -74,50 +74,71 @@ def read_raw_data(file_name: str) -> pd.DataFrame:
 
 
 def clean_sales_data(df: pd.DataFrame) -> pd.DataFrame:
-    logger.info(f"FUNCTION START: clean_sales_data with shape: {df.shape}")
+    logger.info("START: clean_sales_data with df.shape = %s", df.shape)
 
     # Strip whitespace from all string columns
     df = df.apply(lambda col: col.str.strip() if col.dtype == "object" else col)
 
-    # Replace invalid symbols and blanks
-    df.replace({"?": pd.NA, "": pd.NA}, inplace=True)
+    # Replace blank strings and "?" with NaN
+    df.replace(r'^\s*$', pd.NA, regex=True, inplace=True)
+    df.replace("?", pd.NA, inplace=True)
+
+    # Drop rows with any missing values
+    before_dropna = df.shape[0]
+    df.dropna(how="any", inplace=True)
+    logger.info(
+        "Dropped %d rows with blanks or '?'. New shape: %s", before_dropna - df.shape[0], df.shape
+    )
+
+    # Drop rows where SaleAmount is 0.00
+    if "SaleAmount" in df.columns:
+        df["SaleAmount"] = pd.to_numeric(df["SaleAmount"], errors="coerce").fillna(0.0)
+        before_zero = df.shape[0]
+        df = df[df["SaleAmount"] != 0.00]
+        logger.info(
+            "Removed %d rows with 0.00 SaleAmount. New shape: %s",
+            before_zero - df.shape[0],
+            df.shape,
+        )
 
     # Standardize PaymentMethod
     if "PaymentMethod" in df.columns:
         original_methods = df["PaymentMethod"].dropna().unique().tolist()
-
-    # Normalize formatting
-    df["PaymentMethod"] = df["PaymentMethod"].str.replace(" ", "").str.title()
-
-    # Replace known variants and mark invalids
-    df["PaymentMethod"] = df["PaymentMethod"].replace(
-        {
-            "Creditcard": "Credit Card",
-            "Paypal": "PayPal",
-            "Giftcard": "GiftCard",
-            "Bitcoin": pd.NA,  # Not a valid method
-        }
-    )
-    # Drop rows with invalid payment methods
-    df = df[df["PaymentMethod"].notna()]
+        df["PaymentMethod"] = df["PaymentMethod"].str.replace(" ", "").str.title()
+        df["PaymentMethod"] = df["PaymentMethod"].replace(
+            {
+                "Creditcard": "Credit Card",
+                "Paypal": "PayPal",
+                "Giftcard": "GiftCard",
+                "Bitcoin": pd.NA,  # Not a valid method
+            }
+        )
+        before_payment = df.shape[0]
+        df = df[df["PaymentMethod"].notna()]
+        logger.info(
+            "Removed %d rows with invalid PaymentMethod. New shape: %s",
+            before_payment - df.shape[0],
+            df.shape,
+        )
 
     # Convert CampaignID to whole numbers
     if "CampaignID" in df.columns:
         df["CampaignID"] = pd.to_numeric(df["CampaignID"], errors="coerce").fillna(0).astype(int)
         logger.info("Converted CampaignID to whole numbers")
 
-    # Drop rows with critic al missing values
-    df.dropna(
-        subset=["TransactionID", "SaleDate", "CustomerID", "ProductID", "SaleAmount"], inplace=True
+    # Drop rows with critical missing values
+    required_cols = ["TransactionID", "SaleDate", "CustomerID", "ProductID", "SaleAmount"]
+    before_required = df.shape[0]
+    df.dropna(subset=required_cols, inplace=True)
+    logger.info(
+        "Dropped %d rows missing critical fields. Final shape: %s",
+        before_required - df.shape[0],
+        df.shape,
     )
 
-    return df
-
-    # TODO: OPTIONAL Add data profiling here to understand the dataset
-    # Suggestion: Log the datatypes of each column and the number of unique values
-    # Example:
-    # logger.info(f"Column datatypes: \n{df.dtypes}")
-    # logger.info(f"Number of unique values: \n{df.nunique()}")
+    # OPTIONAL: Data profiling
+    logger.info("Column datatypes:\n%s", df.dtypes)
+    logger.info("Unique values per column:\n%s", df.nunique())
 
     return df
 
@@ -128,14 +149,6 @@ def clean_sales_data(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def main() -> pd.DataFrame:
-    input_file = "sales_data.csv"
-    df = read_raw_data(input_file)
-    df = clean_sales_data(df)
-    return df
-
-    """
-    Main function for processing data.
-    """
     logger.info("==================================")
     logger.info("STARTING prepare_sales_data.py")
     logger.info("==================================")
@@ -169,18 +182,21 @@ def main() -> pd.DataFrame:
     if changed_columns:
         logger.info(f"Cleaned column names: {', '.join(changed_columns)}")
 
+    # Apply cleaning logic
+    df = clean_sales_data(df)
+
     # TODO: Remove duplicates
-
-    # TODO:Handle missing values
-
-    # TODO:Remove outliers
+    # TODO: Handle missing values
+    # TODO: Remove outliers
 
     logger.info("==================================")
-    logger.info(f"Original shape: {df.shape}")
-    logger.info(f"Cleaned shape:  {original_shape}")
+    logger.info(f"Original shape: {original_shape}")
+    logger.info(f"Cleaned shape:  {df.shape}")
     logger.info("==================================")
     logger.info("FINISHED prepare_sales_data.py")
     logger.info("==================================")
+
+    return df
 
 
 #####################################
