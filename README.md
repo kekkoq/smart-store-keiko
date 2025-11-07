@@ -216,4 +216,27 @@ uv pip install -r requirements.txt
 $env:PYTHONPATH = "$PWD/src"
 pytest --cov=src --cov-report=term-missing
 
+### 3.8 Data Cleaning Demo: DataScrubber
+
+This project includes a modular data cleaning pipeline using a custom class, DataScrubber, located in src/analytics_project/data_preparation/data_scrubber.py.
+
+To demonstrate its functionality, run the script:
+python scripts/demo_scrubber.py
+
+This script loads three raw datasets from data/raw/, applies standardized cleaning steps, and saves the cleaned outputs to data/cleaned/.
+
+Datasets processed:
+   - customers_data.csv
+   - products_data.csv
+   - sales_data.csv
+
+Cleaning steps applied:
+   - Standardized column names
+   - Filled missing values with "Unknown"
+   - Removed duplicate records
+   - Inspected dataset structure via .info() and .describe()
+   - Saved cleaned outputs to data/cleaned/
+
+
+
 
