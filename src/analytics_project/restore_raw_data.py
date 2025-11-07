@@ -1,5 +1,6 @@
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
 
 # Define paths
 RAW_DATA_DIR = Path("data/raw")
@@ -8,16 +9,16 @@ product_path = RAW_DATA_DIR / "products_data.csv"
 sales_path = RAW_DATA_DIR / "sales_data.csv"
 
 # Define original columns for each file
-customer_columns = ['CustomerID', 'Name', 'Region', 'JoinDate']
-product_columns = ['ProductID', 'ProductName', 'Category', 'UnitPrice']
+customer_columns = ["CustomerID", "Name", "Region", "JoinDate"]
+product_columns = ["ProductID", "ProductName", "Category", "UnitPrice"]
 sales_columns = [
-    'TransactionID',
-    'SaleDate',
-    'CustomerID',
-    'ProductID',
-    'StoreID',
-    'CampaignID',
-    'SaleAmount',
+    "TransactionID",
+    "SaleDate",
+    "CustomerID",
+    "ProductID",
+    "StoreID",
+    "CampaignID",
+    "SaleAmount",
 ]
 
 
@@ -29,6 +30,7 @@ def restore_original_columns(path, original_columns):
 
 
 def main():
+    """Restore original column names for customer, product, and sales datasets."""
     restore_original_columns(customer_path, customer_columns)
     restore_original_columns(product_path, product_columns)
     restore_original_columns(sales_path, sales_columns)

@@ -1,5 +1,4 @@
-"""
-scripts/data_preparation/prepare_sales.py
+"""scripts/data_preparation/prepare_sales.py.
 
 This script reads data from the data/raw folder, cleans the data,
 and writes the cleaned version to the data/prepared folder.
@@ -13,27 +12,27 @@ Tasks:
 """
 
 #####################################
-# Import Modules at the Top
+# Imports
 #####################################
 
-# Import from Python Standard Library
-import pathlib
+# Standard library imports
+from pathlib import Path
 import sys
 
-# Import from external packages (requires a virtual environment)
+# Third-party imports
 import pandas as pd
 
-# Ensure project root is in sys.path for local imports (now 3 parents are needed)
-sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent.parent))
+# Adjust Python path for local imports
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 
-# Import local modules (e.g. utils/logger.py)
+# Local imports
 from analytics_project.utils.logger import logger
 
-# Optional: Use a data_scrubber module for common data cleaning tasks
+# Optional local imports
 # from analytics_project.utils.data_scrubber import DataScrubber
 
 # Constants
-SCRIPTS_DIR = pathlib.Path(__file__).resolve().parent
+SCRIPTS_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPTS_DIR.parent.parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 RAW_DATA_DIR = DATA_DIR / "raw"
@@ -48,18 +47,30 @@ PREPARED_DATA_DIR.mkdir(exist_ok=True)
 # Define Functions - Reusable blocks of code / instructions
 #####################################
 
-# TODO: Complete this by implementing functions based on the logic in the other scripts
-
 
 def read_raw_data(file_name: str) -> pd.DataFrame:
-    """
-    Read raw data from CSV.
+    """Read raw data from CSV file in the raw data directory.
 
-    Args:
-        file_name (str): Name of the CSV file to read.
+    This function reads a CSV file from the raw data directory and returns it as
+    a pandas DataFrame. It logs the loading process, including the file path,
+    number of rows and columns loaded, and a sample of the data.
 
-    Returns:
-        pd.DataFrame: Loaded DataFrame.
+    Parameters
+    ----------
+    file_name : str
+        Name of the CSV file to read from the raw data directory.
+        The file should exist in RAW_DATA_DIR.
+
+    Returns
+    -------
+    pd.DataFrame
+        Loaded DataFrame containing the raw data from the CSV file.
+        The DataFrame structure depends on the input file's content.
+
+    Example
+    -------
+    >>> df = read_raw_data("sales_data.csv")
+    >>> print(f"Loaded {len(df)} rows of data")
     """
     logger.info("FUNCTION START: read_data with file_name=%s", file_name)
 
@@ -74,13 +85,49 @@ def read_raw_data(file_name: str) -> pd.DataFrame:
 
 
 def clean_sales_data(df: pd.DataFrame) -> pd.DataFrame:
+    """Clean and standardize sales data in the DataFrame.
+
+    This function performs several cleaning operations on the sales data:
+    - Strips whitespace from string columns
+    - Handles missing values and invalid entries
+    - Standardizes payment method formatting
+    - Converts data types (e.g., CampaignID to integers)
+    - Removes rows with zero sale amounts
+    - Ensures critical fields are present
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Raw sales data DataFrame with expected columns:
+        - TransactionID
+        - SaleDate
+        - CustomerID
+        - ProductID
+        - SaleAmount
+        Optional columns:
+        - PaymentMethod
+        - CampaignID
+
+    Returns
+    -------
+    pd.DataFrame
+        Cleaned DataFrame with standardized formats and removed invalid entries.
+        Rows may be fewer than input due to filtering of invalid data.
+
+    Notes
+    -----
+    - Rows with missing values in critical fields will be dropped
+    - Zero sale amounts are considered invalid and removed
+    - Payment methods are standardized (e.g., "Creditcard" -> "Credit Card")
+    - Bitcoin is not accepted as a valid payment method
+    """
     logger.info("START: clean_sales_data with df.shape = %s", df.shape)
 
     # Strip whitespace from all string columns
     df = df.apply(lambda col: col.str.strip() if col.dtype == "object" else col)
 
     # Replace blank strings and "?" with NaN
-    df.replace(r'^\s*$', pd.NA, regex=True, inplace=True)
+    df.replace(r"^\s*$", pd.NA, regex=True, inplace=True)
     df.replace("?", pd.NA, inplace=True)
 
     # Drop rows with any missing values
@@ -103,7 +150,6 @@ def clean_sales_data(df: pd.DataFrame) -> pd.DataFrame:
 
     # Standardize PaymentMethod
     if "PaymentMethod" in df.columns:
-        original_methods = df["PaymentMethod"].dropna().unique().tolist()
         df["PaymentMethod"] = df["PaymentMethod"].str.replace(" ", "").str.title()
         df["PaymentMethod"] = df["PaymentMethod"].replace(
             {
@@ -177,7 +223,9 @@ def main() -> pd.DataFrame:
 
     # Log if any column names changed
     changed_columns = [
-        f"{old} -> {new}" for old, new in zip(original_columns, df.columns) if old != new
+        f"{old} -> {new}"
+        for old, new in zip(original_columns, df.columns, strict=True)
+        if old != new
     ]
     if changed_columns:
         logger.info(f"Cleaned column names: {', '.join(changed_columns)}")
@@ -185,9 +233,54 @@ def main() -> pd.DataFrame:
     # Apply cleaning logic
     df = clean_sales_data(df)
 
-    # TODO: Remove duplicates
-    # TODO: Handle missing values
-    # TODO: Remove outliers
+    # Remove duplicates
+    before_dedup = df.shape[0]
+    df = df.drop_duplicates(subset=["TransactionID"], keep="first")
+    logger.info(
+        "Removed %d duplicate transactions. New shape: %s",
+        before_dedup - df.shape[0],
+        df.shape,
+    )
+
+    # Handle missing values with appropriate strategies
+    # For numeric columns, replace missing values with median
+    numeric_cols = df.select_dtypes(include=["int64", "float64"]).columns
+    for col in numeric_cols:
+        if df[col].isna().any():
+            median_value = df[col].median()
+            df[col].fillna(median_value, inplace=True)
+            logger.info(f"Filled {col} missing values with median: {median_value}")
+
+    # For categorical columns, replace missing values with mode
+    categorical_cols = df.select_dtypes(include=["object"]).columns
+    for col in categorical_cols:
+        if df[col].isna().any():
+            mode_value = df[col].mode()[0]
+            df[col].fillna(mode_value, inplace=True)
+            logger.info(f"Filled {col} missing values with mode: {mode_value}")
+
+    # Remove outliers using IQR method for numeric columns
+    def remove_outliers(df: pd.DataFrame, column: str) -> pd.DataFrame:
+        q1 = df[column].quantile(0.25)
+        q3 = df[column].quantile(0.75)
+        iqr = q3 - q1
+        lower_bound = q1 - 1.5 * iqr
+        upper_bound = q3 + 1.5 * iqr
+
+        before_outliers = df.shape[0]
+        df = df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
+        removed = before_outliers - df.shape[0]
+        if removed > 0:
+            logger.info(
+                f"Removed {removed} outliers from {column} (bounds: {lower_bound:.2f} to {upper_bound:.2f})"
+            )
+        return df
+
+    # Apply outlier removal to numeric columns that should have bounds
+    numeric_cols_for_outliers = ["SaleAmount"]  # Add other numeric columns as needed
+    for col in numeric_cols_for_outliers:
+        if col in df.columns:
+            df = remove_outliers(df, col)
 
     logger.info("==================================")
     logger.info(f"Original shape: {original_shape}")
@@ -195,6 +288,11 @@ def main() -> pd.DataFrame:
     logger.info("==================================")
     logger.info("FINISHED prepare_sales_data.py")
     logger.info("==================================")
+
+    # Save prepared data
+    output_path = PREPARED_DATA_DIR / output_file
+    df.to_csv(output_path, index=False)
+    logger.info(f"Saved prepared data to: {output_path}")
 
     return df
 

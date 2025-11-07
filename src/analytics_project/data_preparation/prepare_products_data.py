@@ -1,5 +1,4 @@
-"""
-prepare_products_data.py
+"""prepare_products_data.py.
 
 This script reads products data from the data/raw folder, cleans the data,
 and writes the cleaned version to the data/prepared folder.
@@ -79,13 +78,13 @@ def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     missing_before = df.isna().sum().sum()
     logger.info(f"Total missing values before handling: {missing_before}")
 
-    if 'StockLevel' in df.columns:
-        median_points = df['StockLevel'].median()
-        df.loc[:, 'StockLevel'] = df['StockLevel'].fillna(median_points)
+    if "StockLevel" in df.columns:
+        median_points = df["StockLevel"].median()
+        df.loc[:, "StockLevel"] = df["StockLevel"].fillna(median_points)
 
-    if 'SupplierTier' in df.columns and not df['SupplierTier'].mode().empty:
-        mode_style = df['SupplierTier'].mode()[0]
-        df.loc[:, 'SupplierTier'] = df['SupplierTier'].fillna(mode_style)
+    if "SupplierTier" in df.columns and not df["SupplierTier"].mode().empty:
+        mode_style = df["SupplierTier"].mode()[0]
+        df.loc[:, "SupplierTier"] = df["SupplierTier"].fillna(mode_style)
 
     missing_after = df.isna().sum().sum()
     logger.info(f"Total missing values after handling: {missing_after}")
@@ -96,34 +95,34 @@ def clean_values(df: pd.DataFrame) -> pd.DataFrame:
     logger.info(f"FUNCTION START: clean values with shape: {df.shape}")
 
     # Remove negative StockLevel
-    if 'StockLevel' in df.columns:
-        negative_count = (df['StockLevel'] < 0).sum()
-        df = df[df['StockLevel'] >= 0].copy()
+    if "StockLevel" in df.columns:
+        negative_count = (df["StockLevel"] < 0).sum()
+        df = df[df["StockLevel"] >= 0].copy()
         logger.info(f"Removed {negative_count} rows with negative StockLevel")
 
-        df['StockLevel'] = df['StockLevel'].astype(int)
+        df["StockLevel"] = df["StockLevel"].astype(int)
         logger.info("Converted StockLevel to integer type")
 
     # Standardize SupplierTier values
-    if 'SupplierTier' in df.columns:
-        original_tiers = df['SupplierTier'].dropna().unique().tolist()
+    if "SupplierTier" in df.columns:
+        original_tiers = df["SupplierTier"].dropna().unique().tolist()
 
         # Normalize whitespace and casing
-        df['SupplierTier'] = df['SupplierTier'].astype(str).str.strip().str.title()
+        df["SupplierTier"] = df["SupplierTier"].astype(str).str.strip().str.title()
 
         # Replace 'Unknown' with 'Standard'
-        df['SupplierTier'] = df['SupplierTier'].replace({'Unknown': 'Standard'})
+        df["SupplierTier"] = df["SupplierTier"].replace({"Unknown": "Standard"})
 
         # Validate against known tiers
         tier_map = {
-            'Basic': 'Basic',
-            'Preferred': 'Preferred',
-            'Premium': 'Premium',
-            'Standard': 'Standard',  # Include Standard as valid tier
+            "Basic": "Basic",
+            "Preferred": "Preferred",
+            "Premium": "Premium",
+            "Standard": "Standard",  # Include Standard as valid tier
         }
-        df['SupplierTier'] = df['SupplierTier'].map(tier_map).fillna('Standard')
+        df["SupplierTier"] = df["SupplierTier"].map(tier_map).fillna("Standard")
 
-        updated_tiers = df['SupplierTier'].unique().tolist()
+        updated_tiers = df["SupplierTier"].unique().tolist()
         logger.info(f"Standardized SupplierTier from {original_tiers} to {updated_tiers}")
 
     return df
@@ -131,13 +130,13 @@ def clean_values(df: pd.DataFrame) -> pd.DataFrame:
 
 def remove_outliers(df: pd.DataFrame) -> pd.DataFrame:
     logger.info(f"Removing outliers from shape: {df.shape}")
-    if 'StockLevel' in df.columns:
-        mean = df['StockLevel'].mean()
-        std = df['StockLevel'].std()
+    if "StockLevel" in df.columns:
+        mean = df["StockLevel"].mean()
+        std = df["StockLevel"].std()
         lower = mean - 3 * std
         upper = mean + 3 * std
         original_count = len(df)
-        df = df[df['StockLevel'].between(lower, upper)]
+        df = df[df["StockLevel"].between(lower, upper)]
         removed = original_count - len(df)
         logger.info(f"Outliers removed: {removed}")
     return df
@@ -158,7 +157,7 @@ def main() -> None:
     print(f"volumns: {df.columns.tolist()}")
     print(df.isna().sum())
 
-    if not df.empty and df.columns.dtype == 'object':
+    if not df.empty and df.columns.dtype == "object":
         df.columns = df.columns.str.strip()
 
     df = remove_duplicates(df)

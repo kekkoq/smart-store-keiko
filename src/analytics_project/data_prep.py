@@ -3,13 +3,24 @@
 File: src/analytics_project/data_prep.py.
 """
 
-# Imports after the opening docstring
+"""Module 2: Initial Script to Verify Project Setup.
 
+File: src/analytics_project/data_prep.py.
+"""
+
+# Standard library imports
+import logging
 import pathlib
+from pathlib import Path
 
+# Third-party imports
+import numpy as np
 import pandas as pd
 
-from .utils_logger import init_logger, logger, project_root
+# Local imports
+from .utils_logger import logger, project_root
+
+# ...existing code...from .utils_logger import logger, project_root
 
 # Set up paths as constants
 DATA_DIR: pathlib.Path = project_root.joinpath("data")
@@ -44,11 +55,6 @@ def read_and_log(path: pathlib.Path) -> pd.DataFrame:
         return pd.DataFrame()
 
 
-import pandas as pd
-import numpy as np
-from pathlib import Path
-import logging
-
 # Setup logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -57,9 +63,9 @@ RAW_DATA_DIR = Path("data/raw")
 
 
 def drop_enrichment_columns(df):
-    suffixes = ('_int', '_str', '_pct', '_units')
+    suffixes = ("_int", "_str", "_pct", "_units")
     cols_to_drop = [col for col in df.columns if col.endswith(suffixes)]
-    return df.drop(columns=cols_to_drop, errors='ignore')
+    return df.drop(columns=cols_to_drop, errors="ignore")
 
 
 def enrich_customers(path):
@@ -67,15 +73,15 @@ def enrich_customers(path):
     df = drop_enrichment_columns(df)
 
     # Add LoyaltyPoints (0–5000), inject NaN and negative
-    df['LoyaltyPoints'] = np.random.randint(0, 5001, size=len(df))
-    df.loc[df.sample(frac=0.03).index, 'LoyaltyPoints'] = np.nan
-    df.loc[0, 'LoyaltyPoints'] = -150
+    df["LoyaltyPoints"] = np.random.randint(0, 5001, size=len(df))
+    df.loc[df.sample(frac=0.03).index, "LoyaltyPoints"] = np.nan
+    df.loc[0, "LoyaltyPoints"] = -150
 
     # Add EngagementStyle (Mobile/Desktop/InStore), inject typo and unknown
-    df['EngagementStyle'] = np.random.choice(['Mobile', 'Desktop', 'InStore'], size=len(df))
-    df.loc[df.sample(frac=0.02).index, 'EngagementStyle'] = np.nan
-    df.loc[1, 'EngagementStyle'] = 'Mobile '
-    df.loc[2, 'EngagementStyle'] = 'Kiosk'
+    df["EngagementStyle"] = np.random.choice(["Mobile", "Desktop", "InStore"], size=len(df))
+    df.loc[df.sample(frac=0.02).index, "EngagementStyle"] = np.nan
+    df.loc[1, "EngagementStyle"] = "Mobile "
+    df.loc[2, "EngagementStyle"] = "Kiosk"
 
     df.to_csv(path, index=False)
     print(f"✅ Enriched: {path.name}")
@@ -86,15 +92,15 @@ def enrich_products(path):
     df = drop_enrichment_columns(df)
 
     # Add StockLevel (100–1000), inject NaN and negative
-    df['StockLevel'] = np.random.randint(100, 1001, size=len(df))
-    df.loc[df.sample(frac=0.03).index, 'StockLevel'] = np.nan
-    df.loc[0, 'StockLevel'] = -50
+    df["StockLevel"] = np.random.randint(100, 1001, size=len(df))
+    df.loc[df.sample(frac=0.03).index, "StockLevel"] = np.nan
+    df.loc[0, "StockLevel"] = -50
 
     # Add SupplierTier (Basic/Preferred/Premium), inject typo and unknown
-    df['SupplierTier'] = np.random.choice(['Basic', 'Preferred', 'Premium'], size=len(df))
-    df.loc[df.sample(frac=0.02).index, 'SupplierTier'] = np.nan
-    df.loc[1, 'SupplierTier'] = 'Preferred '
-    df.loc[2, 'SupplierTier'] = 'UnknownTier'
+    df["SupplierTier"] = np.random.choice(["Basic", "Preferred", "Premium"], size=len(df))
+    df.loc[df.sample(frac=0.02).index, "SupplierTier"] = np.nan
+    df.loc[1, "SupplierTier"] = "Preferred "
+    df.loc[2, "SupplierTier"] = "UnknownTier"
 
     df.to_csv(path, index=False)
     print(f"✅ Enriched: {path.name}")
@@ -105,20 +111,20 @@ def enrich_sales(path):
     df = drop_enrichment_columns(df)
 
     # Add DiscountPercent (0–30), inject NaN and outlier
-    df['DiscountPercent'] = np.round(np.random.uniform(0, 30, size=len(df)), 2)
-    df.loc[df.sample(frac=0.03).index, 'DiscountPercent'] = np.nan
-    df.loc[0, 'DiscountPercent'] = 150.0
+    df["DiscountPercent"] = np.round(np.random.uniform(0, 30, size=len(df)), 2)
+    df.loc[df.sample(frac=0.03).index, "DiscountPercent"] = np.nan
+    df.loc[0, "DiscountPercent"] = 150.0
 
     # Add PaymentMethod (CreditCard/PayPal/WireTransfer/GiftCard), inject typo and unknown
-    df['PaymentMethod'] = np.random.choice(
-        ['CreditCard', 'PayPal', 'WireTransfer', 'GiftCard'], size=len(df)
+    df["PaymentMethod"] = np.random.choice(
+        ["CreditCard", "PayPal", "WireTransfer", "GiftCard"], size=len(df)
     )
-    df.loc[df.sample(frac=0.02).index, 'PaymentMethod'] = np.nan
-    df.loc[1, 'PaymentMethod'] = 'Credit Card'
-    df.loc[2, 'PaymentMethod'] = 'Bitcoin'
+    df.loc[df.sample(frac=0.02).index, "PaymentMethod"] = np.nan
+    df.loc[1, "PaymentMethod"] = "Credit Card"
+    df.loc[2, "PaymentMethod"] = "Bitcoin"
 
     df.to_csv(path, index=False)
-    print(f"✅ Enriched: {path.name}")
+    print(f" Enriched: {path.name}")
 
 
 def main():

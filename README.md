@@ -237,6 +237,36 @@ Cleaning steps applied:
    - Inspected dataset structure via .info() and .describe()
    - Saved cleaned outputs to data/cleaned/
 
+Note about DataScrubber outputs and how to run it
+-------------------------------------------------
+
+The demo script uses the project's `DataScrubber` class to apply a small, repeatable
+cleaning pipeline and writes cleaned CSVs into the repository's `data/cleaned/`
+directory. After running the demo you should find the following files (examples):
+
+- `data/cleaned/customers_cleaned.csv`
+- `data/cleaned/products_cleaned.csv`
+- `data/cleaned/sales_cleaned.csv`
+
+Run the demo script from the repository root using the virtualenv Python executable:
+
+```powershell
+C:\Repos\smart-store-keiko\.venv\Scripts\python.exe scripts/demo_scrubber.py
+```
+
+Alternatively run the customer-only cleaning helper script:
+
+```powershell
+C:\Repos\smart-store-keiko\.venv\Scripts\python.exe scripts/run_cleaning.py
+```
+
+Notes
+- `scripts/demo_scrubber.py` processes all three raw datasets.
+- `scripts/run_cleaning.py` focuses on the customers dataset only.
+- `src/analytics_project/data_preparation/data_scrubber.py` is a reusable library module — you don't
+  run it directly; it is imported by the demo scripts.
+
+
 
 
 

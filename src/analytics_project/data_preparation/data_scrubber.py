@@ -1,60 +1,89 @@
-"""
-utils/data_scrubber.py
+"""Data scrubber utilities.
 
-Reusable class for cleaning and preparing pandas DataFrames.
-Designed for consistent operations across multiple datasets.
+This module provides the :class:`DataScrubber` helper for common
+data-cleaning operations on pandas DataFrames. It is intended to keep
+small, well-documented, and testable transformations in one place so
+other scripts can reuse them.
 
-Includes methods for:
-- Standardizing column names
-- Removing duplicates
-- Handling missing values
-- Formatting string columns
-- Filtering outliers
-- Renaming and reordering columns
-- Parsing date fields
+Public API
+----------
+DataScrubber
+    Lightweight, chainable operations for preparing tabular datasets.
 """
+
+import io
+from pathlib import Path
 
 import pandas as pd
-import io
-from typing import List, Dict, Union, Tuple
+
+
+__all__ = ["DataScrubber"]
 
 
 class DataScrubber:
+    """A small pipeline of reusable DataFrame cleaning helpers.
+
+    Contract (inputs/outputs):
+    - Input: a pandas.DataFrame provided at construction
+    - Output: methods mutate ``self.df`` in-place and return it for
+      chaining. Methods raise :class:`ValueError` for missing columns.
+    """
+
     def __init__(self, df: pd.DataFrame):
-        """
-        Initialize with a DataFrame to be cleaned.
+        """Initialize with a DataFrame to be cleaned.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The DataFrame to operate on. The object stores this as
+            ``self.df`` and updates it in-place.
         """
         self.df = df
 
     def standardize_column_names(self) -> pd.DataFrame:
-        """
-        Convert all column names to lowercase and replace spaces with underscores.
-        """
+        """Convert all column names to lowercase and replace spaces with underscores."""
         self.df.columns = [col.strip().lower().replace(" ", "_") for col in self.df.columns]
         return self.df
 
     def remove_duplicate_records(self) -> pd.DataFrame:
-        """
-        Drop duplicate rows from the DataFrame.
-        """
+        """Drop duplicate rows from the DataFrame."""
         self.df = self.df.drop_duplicates()
         return self.df
 
-    def save(self, path):
-        """Save the cleaned DataFrame to a CSV file."""
-        self.df.to_csv(path, index=False)
+    def save(self, path: str | Path) -> None:
+        """Save the cleaned DataFrame to a CSV file.
 
-    from typing import Optional
+        Parameters
+        ----------
+        path : str or Path
+            Destination file path for the CSV. Parent directories will be
+            created if necessary.
+        """
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            self.df.to_csv(path, index=False)
+        except Exception as exc:  # pragma: no cover - IO interaction
+            raise OSError(f"Failed to save DataFrame to {path}: {exc}") from exc
 
     def handle_missing_data(
-        self, drop: bool = False, fill_value: Optional[Union[str, int, float]] = None
+        self, drop: bool = False, fill_value: str | int | float | None = None
     ) -> pd.DataFrame:
-        """
-        Handle missing values by dropping or filling.
+        """Handle missing values by dropping or filling.
 
-        Parameters:
-            drop (bool): If True, drop rows with missing values.
-            fill_value: Value to fill missing entries.
+        Parameters
+        ----------
+        drop : bool, optional
+            If True, drop rows with missing values (default False).
+        fill_value : str | int | float | None, optional
+            Value to use when filling missing entries. If ``None`` and
+            ``drop`` is False, the DataFrame is left unchanged for missing
+            values.
+
+        Returns
+        -------
+        pd.DataFrame
+            The cleaned DataFrame (same object as ``self.df``).
         """
         if drop:
             self.df = self.df.dropna()
@@ -63,12 +92,20 @@ class DataScrubber:
         return self.df
 
     def format_column_strings(self, column: str, case: str = "lower") -> pd.DataFrame:
-        """
-        Format strings in a column: trim whitespace and apply casing.
+        """Format strings in a column: trim whitespace and apply casing.
 
-        Parameters:
-            column (str): Column to format.
-            case (str): 'lower' or 'upper'
+        Parameters
+        ----------
+        column : str
+            Column name to format.
+        case : str, optional
+            One of ``"lower"`` or ``"upper"`` specifying the casing to
+            apply. Default is ``"lower"``.
+
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with the formatted column.
         """
         if column not in self.df.columns:
             raise ValueError(f"Column '{column}' not found.")
@@ -78,12 +115,18 @@ class DataScrubber:
             self.df[column] = self.df[column].astype(str).str.upper().str.strip()
         return self.df
 
-    def rename_columns(self, mapping: Dict[str, str]) -> pd.DataFrame:
-        """
-        Rename columns using a provided dictionary.
+    def rename_columns(self, mapping: dict[str, str]) -> pd.DataFrame:
+        """Rename columns using a provided dictionary.
 
-        Parameters:
-            mapping (dict): {old_name: new_name}
+        Parameters
+        ----------
+        mapping : dict[str, str]
+            Mapping of old column names to new column names.
+
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with renamed columns.
         """
         for old in mapping:
             if old not in self.df.columns:
@@ -91,12 +134,18 @@ class DataScrubber:
         self.df = self.df.rename(columns=mapping)
         return self.df
 
-    def reorder_columns(self, order: List[str]) -> pd.DataFrame:
-        """
-        Reorder columns based on a specified list.
+    def reorder_columns(self, order: list[str]) -> pd.DataFrame:
+        """Reorder columns based on a specified list.
 
-        Parameters:
-            order (list): Desired column order.
+        Parameters
+        ----------
+        order : list[str]
+            Desired column order. All names must exist in the DataFrame.
+
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with reordered columns.
         """
         for col in order:
             if col not in self.df.columns:
@@ -105,13 +154,21 @@ class DataScrubber:
         return self.df
 
     def filter_outliers(self, column: str, min_val: float, max_val: float) -> pd.DataFrame:
-        """
-        Remove rows where column values fall outside bounds.
+        """Remove rows where column values fall outside bounds.
 
-        Parameters:
-            column (str): Column to filter.
-            min_val (float): Minimum allowed value.
-            max_val (float): Maximum allowed value.
+        Parameters
+        ----------
+        column : str
+            Column to filter.
+        min_val : float
+            Minimum allowed value (inclusive).
+        max_val : float
+            Maximum allowed value (inclusive).
+
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with out-of-range rows removed.
         """
         if column not in self.df.columns:
             raise ValueError(f"Column '{column}' not found.")
@@ -119,12 +176,19 @@ class DataScrubber:
         return self.df
 
     def convert_column_type(self, column: str, dtype: type) -> pd.DataFrame:
-        """
-        Convert a column to a specified data type.
+        """Convert a column to a specified data type.
 
-        Parameters:
-            column (str): Column to convert.
-            dtype (type): Target data type.
+        Parameters
+        ----------
+        column : str
+            Column to convert.
+        dtype : type
+            Target data type (e.g. ``int``, ``float``, ``str``).
+
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with the converted column.
         """
         if column not in self.df.columns:
             raise ValueError(f"Column '{column}' not found.")
@@ -132,22 +196,27 @@ class DataScrubber:
         return self.df
 
     def parse_date_column(self, column: str, new_column: str = "parsed_date") -> pd.DataFrame:
-        """
-        Parse a column as datetime and store in a new column.
+        """Parse a column as datetime and store in a new column.
 
-        Parameters:
-            column (str): Column to parse.
-            new_column (str): Name of the new datetime column.
+        Parameters
+        ----------
+        column : str
+            Column to parse as dates.
+        new_column : str, optional
+            Name for the new datetime column (default ``"parsed_date"``).
+
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with the parsed date column appended.
         """
         if column not in self.df.columns:
             raise ValueError(f"Column '{column}' not found.")
         self.df[new_column] = pd.to_datetime(self.df[column], errors="coerce")
         return self.df
 
-    def inspect(self) -> Tuple[str, str]:
-        """
-        Return info and summary statistics as strings.
-        """
+    def inspect(self) -> tuple[str, str]:
+        """Return info and summary statistics as strings."""
         buffer = io.StringIO()
         self.df.info(buf=buffer)
         info = buffer.getvalue()

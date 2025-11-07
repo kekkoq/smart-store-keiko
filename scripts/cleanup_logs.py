@@ -1,5 +1,5 @@
-import os
 import glob
+import os
 import time
 
 # Keep logs from the past 7 days

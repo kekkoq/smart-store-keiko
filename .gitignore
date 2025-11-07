@@ -116,3 +116,5 @@ figures/
 samples/
 *.sample.*
 *.bak
+# ignore all cleaned data except CSV files
+!data/cleaned/*.csv

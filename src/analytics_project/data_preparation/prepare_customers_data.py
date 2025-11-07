@@ -1,5 +1,4 @@
-"""
-prepare_customers_data.py
+"""prepare_customers_data.py.
 
 This script reads customer data from the data/raw folder, cleans the data,
 and writes the cleaned version to the data/prepared folder.
@@ -79,13 +78,13 @@ def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     missing_before = df.isna().sum().sum()
     logger.info(f"Total missing values before handling: {missing_before}")
 
-    if 'LoyaltyPoints' in df.columns:
-        median_points = df['LoyaltyPoints'].median()
-        df.loc[:, 'LoyaltyPoints'] = df['LoyaltyPoints'].fillna(median_points)
+    if "LoyaltyPoints" in df.columns:
+        median_points = df["LoyaltyPoints"].median()
+        df.loc[:, "LoyaltyPoints"] = df["LoyaltyPoints"].fillna(median_points)
 
-    if 'EngagementStyle' in df.columns and not df['EngagementStyle'].mode().empty:
-        mode_style = df['EngagementStyle'].mode()[0]
-        df.loc[:, 'EngagementStyle'] = df['EngagementStyle'].fillna(mode_style)
+    if "EngagementStyle" in df.columns and not df["EngagementStyle"].mode().empty:
+        mode_style = df["EngagementStyle"].mode()[0]
+        df.loc[:, "EngagementStyle"] = df["EngagementStyle"].fillna(mode_style)
 
     missing_after = df.isna().sum().sum()
     logger.info(f"Total missing values after handling: {missing_after}")
@@ -96,9 +95,9 @@ def clean_values(df: pd.DataFrame) -> pd.DataFrame:
     logger.info(f"FUNCTION START: clean values with shape: {df.shape}")
 
     # Remove negative LoyaltyPoints
-    if 'LoyaltyPoints' in df.columns:
-        negative_count = (df['LoyaltyPoints'] < 0).sum()
-        df = df[df['LoyaltyPoints'] >= 0].copy()
+    if "LoyaltyPoints" in df.columns:
+        negative_count = (df["LoyaltyPoints"] < 0).sum()
+        df = df[df["LoyaltyPoints"] >= 0].copy()
         logger.info(f"Removed {negative_count} rows with negative LoyaltyPoints")
 
     # Convert LoyaltyPoints to whole numbers
@@ -109,19 +108,19 @@ def clean_values(df: pd.DataFrame) -> pd.DataFrame:
         logger.info("Converted LoyaltyPoints to whole numbers")
 
     # Standardize EngagementStyle values
-    if 'EngagementStyle' in df.columns:
+    if "EngagementStyle" in df.columns:
         style_map = {
-            'Mobile': 'Mobile',
-            'Desktop': 'Desktop',
-            'InStore': 'InStore',
-            'Kiosk': 'InStore',
-            'Tablet': 'Mobile',
+            "Mobile": "Mobile",
+            "Desktop": "Desktop",
+            "InStore": "InStore",
+            "Kiosk": "InStore",
+            "Tablet": "Mobile",
         }
-        original_styles = df['EngagementStyle'].unique().tolist()
-        df['EngagementStyle'] = (
-            df['EngagementStyle'].astype(str).str.strip().map(style_map).fillna('Unknown')
+        original_styles = df["EngagementStyle"].unique().tolist()
+        df["EngagementStyle"] = (
+            df["EngagementStyle"].astype(str).str.strip().map(style_map).fillna("Unknown")
         )
-        updated_styles = df['EngagementStyle'].unique().tolist()
+        updated_styles = df["EngagementStyle"].unique().tolist()
         logger.info(f"Standardized EngagementStyle from {original_styles} to {updated_styles}")
 
     return df
@@ -129,14 +128,14 @@ def clean_values(df: pd.DataFrame) -> pd.DataFrame:
 
 def remove_outliers(df: pd.DataFrame) -> pd.DataFrame:
     logger.info(f"Removing outliers from shape: {df.shape}")
-    if 'LoyaltyPoints' in df.columns:
-        mean = df['LoyaltyPoints'].mean()
-        std = df['LoyaltyPoints'].std()
+    if "LoyaltyPoints" in df.columns:
+        mean = df["LoyaltyPoints"].mean()
+        std = df["LoyaltyPoints"].std()
         lower = mean - 3 * std
         upper = mean + 3 * std
         original_count = len(df)
-        df = df[df['LoyaltyPoints'] >= 0]
-        df = df[df['LoyaltyPoints'].between(lower, upper)]
+        df = df[df["LoyaltyPoints"] >= 0]
+        df = df[df["LoyaltyPoints"].between(lower, upper)]
         removed = original_count - len(df)
         logger.info(f"Outliers removed: {removed}")
     return df
@@ -157,28 +156,28 @@ def main() -> None:
     print(f"Columns: {df.columns.tolist()}")
     print(df.isna().sum())
 
-    if not df.empty and df.columns.dtype == 'object':
+    if not df.empty and df.columns.dtype == "object":
         df.columns = df.columns.str.strip()
 
     df = remove_duplicates(df)
     print("\n🔍 After remove_duplicates:")
-    print(df['LoyaltyPoints'].describe())
-    print(df['EngagementStyle'].value_counts(dropna=False))
+    print(df["LoyaltyPoints"].describe())
+    print(df["EngagementStyle"].value_counts(dropna=False))
 
     df = handle_missing_values(df)
     print("\n🔍 After handle_missing_values:")
-    print("Missing LoyaltyPoints:", df['LoyaltyPoints'].isna().sum())
-    print("Missing EngagementStyle:", df['EngagementStyle'].isna().sum())
+    print("Missing LoyaltyPoints:", df["LoyaltyPoints"].isna().sum())
+    print("Missing EngagementStyle:", df["EngagementStyle"].isna().sum())
 
     df = clean_values(df)
     print("\n🔍 After clean_values:")
-    print("Min LoyaltyPoints:", df['LoyaltyPoints'].min())
-    print("EngagementStyle values:", df['EngagementStyle'].unique())
+    print("Min LoyaltyPoints:", df["LoyaltyPoints"].min())
+    print("EngagementStyle values:", df["EngagementStyle"].unique())
 
     df = remove_outliers(df)
     print("\n🔍 After remove_outliers:")
-    print("Min LoyaltyPoints:", df['LoyaltyPoints'].min())
-    print("EngagementStyle values:", df['EngagementStyle'].unique())
+    print("Min LoyaltyPoints:", df["LoyaltyPoints"].min())
+    print("EngagementStyle values:", df["EngagementStyle"].unique())
 
     save_prepared_data(df, output_file)
     logger.info("=== FINISHED prepare_customers_data.py ===")
