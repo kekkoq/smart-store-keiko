@@ -216,55 +216,43 @@ uv pip install -r requirements.txt
 $env:PYTHONPATH = "$PWD/src"
 pytest --cov=src --cov-report=term-missing
 
-### 3.8 Data Cleaning Demo: DataScrubber
+### 3.8 Data Cleaning with DataScrubber
 
-This project includes a modular data cleaning pipeline using a custom class, DataScrubber, located in src/analytics_project/data_preparation/data_scrubber.py.
+This project includes a modular data cleaning pipeline using the DataScrubber class, located in
+`src/analytics_project/data_preparation/data_scrubber.py`. The DataScrubber provides reusable
+cleaning operations that are used by specialized preparation scripts for each data type.
 
-To demonstrate its functionality, run the script:
-python scripts/demo_scrubber.py
+Data Preparation Scripts:
+- `prepare_customers_data.py`: Cleans and standardizes customer information
+- `prepare_products_data.py`: Processes product catalog data
+- `prepare_sales_data.py`: Handles transaction records
 
-This script loads three raw datasets from data/raw/, applies standardized cleaning steps, and saves the cleaned outputs to data/cleaned/.
+Each script can be run independently to process its specific dataset. The scripts:
+1. Read raw data from `data/raw/`
+2. Apply standardized cleaning steps using DataScrubber:
+   - Standardize column names
+   - Remove duplicates
+   - Handle missing values
+   - Apply domain-specific standardization
+   - Validate data types and ranges
+3. Save cleaned outputs to `data/prepared/`
 
-Datasets processed:
-   - customers_data.csv
-   - products_data.csv
-   - sales_data.csv
-
-Cleaning steps applied:
-   - Standardized column names
-   - Filled missing values with "Unknown"
-   - Removed duplicate records
-   - Inspected dataset structure via .info() and .describe()
-   - Saved cleaned outputs to data/cleaned/
-
-Note about DataScrubber outputs and how to run it
--------------------------------------------------
-
-The demo script uses the project's `DataScrubber` class to apply a small, repeatable
-cleaning pipeline and writes cleaned CSVs into the repository's `data/cleaned/`
-directory. After running the demo you should find the following files (examples):
-
-- `data/cleaned/customers_cleaned.csv`
-- `data/cleaned/products_cleaned.csv`
-- `data/cleaned/sales_cleaned.csv`
-
-Run the demo script from the repository root using the virtualenv Python executable:
+To run a data preparation script, use the Python module syntax:
 
 ```powershell
-C:\Repos\smart-store-keiko\.venv\Scripts\python.exe scripts/demo_scrubber.py
+# From the repository root:
+.\.venv\Scripts\python.exe -m analytics_project.data_preparation.prepare_customers_data
+.\.venv\Scripts\python.exe -m analytics_project.data_preparation.prepare_products_data
+.\.venv\Scripts\python.exe -m analytics_project.data_preparation.prepare_sales_data
 ```
 
-Alternatively run the customer-only cleaning helper script:
+The cleaned datasets will be saved as:
+- `data/prepared/customers_prepared.csv`
+- `data/prepared/products_prepared.csv`
+- `data/prepared/sales_prepared.csv`
 
-```powershell
-C:\Repos\smart-store-keiko\.venv\Scripts\python.exe scripts/run_cleaning.py
-```
-
-Notes
-- `scripts/demo_scrubber.py` processes all three raw datasets.
-- `scripts/run_cleaning.py` focuses on the customers dataset only.
-- `src/analytics_project/data_preparation/data_scrubber.py` is a reusable library module — you don't
-  run it directly; it is imported by the demo scripts.
+Note: The `DataScrubber` class is a reusable library module that provides the core cleaning
+functionality. It is not meant to be run directly but is imported by the preparation scripts.
 
 
 

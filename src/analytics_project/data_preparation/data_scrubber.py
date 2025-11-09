@@ -12,12 +12,18 @@ DataScrubber
 """
 
 import io
-from pathlib import Path
-
 import pandas as pd
-
+from pathlib import Path
+import re
 
 __all__ = ["DataScrubber"]
+
+
+def camel_to_snake(name: str) -> str:
+    name = name.strip()
+    # Insert underscore between lowercase-uppercase boundaries
+    name = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", name)
+    return name.lower()
 
 
 class DataScrubber:
@@ -41,8 +47,8 @@ class DataScrubber:
         self.df = df
 
     def standardize_column_names(self) -> pd.DataFrame:
-        """Convert all column names to lowercase and replace spaces with underscores."""
-        self.df.columns = [col.strip().lower().replace(" ", "_") for col in self.df.columns]
+        """Convert camelCase and spaced column names to snake_case."""
+        self.df.columns = [camel_to_snake(col) for col in self.df.columns]
         return self.df
 
     def remove_duplicate_records(self) -> pd.DataFrame:
@@ -202,6 +208,7 @@ class DataScrubber:
         ----------
         column : str
             Column to parse as dates.
+
         new_column : str, optional
             Name for the new datetime column (default ``"parsed_date"``).
 
@@ -222,3 +229,32 @@ class DataScrubber:
         info = buffer.getvalue()
         summary = self.df.describe(include="all").to_string()
         return info, summary
+
+    def remove_negative_values(self, column: str) -> pd.DataFrame:
+        """Remove rows where the specified column has negative values.
+
+        Parameters
+        ----------
+        column : str
+            Column to check for negative values.
+
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with negative values removed.
+        """
+        if column not in self.df.columns:
+            raise ValueError(f"Column '{column}' not found.")
+        self.df = self.df[self.df[column] >= 0]
+        return self.df
+
+    def convert_empty_strings_to_na(self) -> pd.DataFrame:
+        """Convert empty strings in the DataFrame to missing values (NaN).
+
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with empty strings replaced by NaN.
+        """
+        self.df = self.df.replace("", pd.NA)
+        return self.df

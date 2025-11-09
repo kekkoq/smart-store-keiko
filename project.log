@@ -1,8 +1,9 @@
-2025-11-03 20:27:INFO    AT utils_logger.py:104: Logging to file: C:\Repos\smart-store-keiko\project.log
-2025-11-03 20:27:INFO    AT data_prep.py:130: Starting data preparation...
-2025-11-03 20:27:INFO    AT data_prep.py:32: Reading raw data from C:\Repos\smart-store-keiko\data\raw\customers_data.csv.
-2025-11-03 20:27:INFO    AT data_prep.py:35: customers_data.csv: loaded DataFrame with shape 201 rows x 10 cols
-2025-11-03 20:27:INFO    AT data_prep.py:32: Reading raw data from C:\Repos\smart-store-keiko\data\raw\products_data.csv.
-2025-11-03 20:27:INFO    AT data_prep.py:35: products_data.csv: loaded DataFrame with shape 100 rows x 12 cols
-2025-11-03 20:27:INFO    AT data_prep.py:32: Reading raw data from C:\Repos\smart-store-keiko\data\raw\sales_data.csv.
-2025-11-03 20:27:INFO    AT data_prep.py:35: sales_data.csv: loaded DataFrame with shape 2001 rows x 14 cols
+2025-11-07 18:37:INFO    AT logger.py:104: Logging to file: C:\Repos\smart-store-keiko\project.log
+2025-11-07 18:37:INFO    AT logger.py:115: This is an example info message.
+2025-11-07 18:37:WARNING AT logger.py:116: This is an example warning message.
+2025-11-07 18:37:ERROR   AT logger.py:117: This is an example error message.
+2025-11-07 18:37:INFO    AT logger.py:115: This is an example info message.
+2025-11-07 18:37:WARNING AT logger.py:116: This is an example warning message.
+2025-11-07 18:37:ERROR   AT logger.py:117: This is an example error message.
+2025-11-07 18:37:INFO    AT logger.py:124: View the log output at C:\Repos\smart-store-keiko\project.log
+2025-11-07 18:37:INFO    AT test_utils_logger.py:65: Smoke test message

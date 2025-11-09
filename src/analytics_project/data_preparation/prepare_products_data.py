@@ -1,49 +1,38 @@
 """prepare_products_data.py.
 
-This script reads products data from the data/raw folder, cleans the data,
-and writes the cleaned version to the data/prepared folder.
+This script reads products data from the data/raw folder, cleans the data using
+the DataScrubber utility, and writes the cleaned version to the data/prepared folder.
 
-Steps:
-- Remove duplicates
+Operations:
+- Standardize column names and data types
+- Remove duplicates and outliers
 - Handle missing values
-- Remove outliers
+- Standardize supplier tiers
+- Validate stock levels
 - Save cleaned data
 """
 
-# ================================
-
-# Import from Python Standard Library
 import pathlib
 import sys
 
-# Add project root to sys.path (so local imports work)
-sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent.parent))
-
-# Import from external packages
 import pandas as pd
 
-# Import local modules
-from analytics_project.utils.logger import logger
+# Add project root to sys.path for local imports
+sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent.parent))
 
-# ================================
-# Path Setup
-# ================================
+from analytics_project.utils.logger import logger
+from analytics_project.data_preparation.data_scrubber import DataScrubber
+
+# Configure paths
 SCRIPTS_DIR = pathlib.Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPTS_DIR.parent.parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 RAW_DATA_DIR = DATA_DIR / "raw"
 PREPARED_DATA_DIR = DATA_DIR / "prepared"
 
-print(f"RAW_DATA_DIR resolved to: {RAW_DATA_DIR}")
-
 # Ensure directories exist
-DATA_DIR.mkdir(exist_ok=True)
-RAW_DATA_DIR.mkdir(exist_ok=True)
-PREPARED_DATA_DIR.mkdir(exist_ok=True)
-
-# ================================
-# Functions
-# ================================
+for directory in [DATA_DIR, RAW_DATA_DIR, PREPARED_DATA_DIR]:
+    directory.mkdir(exist_ok=True)
 
 
 def read_raw_data(file_name: str) -> pd.DataFrame:
@@ -78,13 +67,13 @@ def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     missing_before = df.isna().sum().sum()
     logger.info(f"Total missing values before handling: {missing_before}")
 
-    if "StockLevel" in df.columns:
-        median_points = df["StockLevel"].median()
-        df.loc[:, "StockLevel"] = df["StockLevel"].fillna(median_points)
+    if "stock_level" in df.columns:
+        median_points = df["stock_level"].median()
+        df.loc[:, "stock_level"] = df["stock_level"].fillna(median_points)
 
-    if "SupplierTier" in df.columns and not df["SupplierTier"].mode().empty:
-        mode_style = df["SupplierTier"].mode()[0]
-        df.loc[:, "SupplierTier"] = df["SupplierTier"].fillna(mode_style)
+    if "supplier_tier" in df.columns and not df["supplier_tier"].mode().empty:
+        mode_style = df["supplier_tier"].mode()[0]
+        df.loc[:, "supplier_tier"] = df["supplier_tier"].fillna(mode_style)
 
     missing_after = df.isna().sum().sum()
     logger.info(f"Total missing values after handling: {missing_after}")
@@ -94,24 +83,24 @@ def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
 def clean_values(df: pd.DataFrame) -> pd.DataFrame:
     logger.info(f"FUNCTION START: clean values with shape: {df.shape}")
 
-    # Remove negative StockLevel
-    if "StockLevel" in df.columns:
-        negative_count = (df["StockLevel"] < 0).sum()
-        df = df[df["StockLevel"] >= 0].copy()
-        logger.info(f"Removed {negative_count} rows with negative StockLevel")
+    # Remove negative stock_level
+    if "stock_level" in df.columns:
+        negative_count = (df["stock_level"] < 0).sum()
+        df = df[df["stock_level"] >= 0].copy()
+        logger.info(f"Removed {negative_count} rows with negative stock_level")
 
-        df["StockLevel"] = df["StockLevel"].astype(int)
-        logger.info("Converted StockLevel to integer type")
+        df["stock_level"] = df["stock_level"].astype(int)
+        logger.info("Converted stock_level to integer type")
 
-    # Standardize SupplierTier values
-    if "SupplierTier" in df.columns:
-        original_tiers = df["SupplierTier"].dropna().unique().tolist()
+    # Standardize supplier_tier values
+    if "supplier_tier" in df.columns:
+        original_tiers = df["supplier_tier"].dropna().unique().tolist()
 
         # Normalize whitespace and casing
-        df["SupplierTier"] = df["SupplierTier"].astype(str).str.strip().str.title()
+        df["supplier_tier"] = df["supplier_tier"].astype(str).str.strip().str.title()
 
         # Replace 'Unknown' with 'Standard'
-        df["SupplierTier"] = df["SupplierTier"].replace({"Unknown": "Standard"})
+        df["supplier_tier"] = df["supplier_tier"].replace({"Unknown": "Standard"})
 
         # Validate against known tiers
         tier_map = {
@@ -120,23 +109,23 @@ def clean_values(df: pd.DataFrame) -> pd.DataFrame:
             "Premium": "Premium",
             "Standard": "Standard",  # Include Standard as valid tier
         }
-        df["SupplierTier"] = df["SupplierTier"].map(tier_map).fillna("Standard")
+        df["supplier_tier"] = df["supplier_tier"].map(tier_map).fillna("Standard")
 
-        updated_tiers = df["SupplierTier"].unique().tolist()
-        logger.info(f"Standardized SupplierTier from {original_tiers} to {updated_tiers}")
+        updated_tiers = df["supplier_tier"].unique().tolist()
+        logger.info(f"Standardized supplier_tier from {original_tiers} to {updated_tiers}")
 
     return df
 
 
 def remove_outliers(df: pd.DataFrame) -> pd.DataFrame:
     logger.info(f"Removing outliers from shape: {df.shape}")
-    if "StockLevel" in df.columns:
-        mean = df["StockLevel"].mean()
-        std = df["StockLevel"].std()
+    if "stock_level" in df.columns:
+        mean = df["stock_level"].mean()
+        std = df["stock_level"].std()
         lower = mean - 3 * std
         upper = mean + 3 * std
         original_count = len(df)
-        df = df[df["StockLevel"].between(lower, upper)]
+        df = df[df["stock_level"].between(lower, upper)]
         removed = original_count - len(df)
         logger.info(f"Outliers removed: {removed}")
     return df
@@ -147,30 +136,84 @@ def remove_outliers(df: pd.DataFrame) -> pd.DataFrame:
 # ================================
 
 
+def clean_products_data(input_file: str = "products_data.csv") -> pd.DataFrame:
+    """Clean product data using DataScrubber.
+
+    Parameters
+    ----------
+    input_file : str, optional
+        Name of input file in raw data directory, by default "products_data.csv"
+
+    Returns
+    -------
+    pd.DataFrame
+        Cleaned product data with standardized formats and validated stock levels
+    """
+    logger.info("=== Starting product data cleaning ===")
+
+    # Read raw data
+    file_path = RAW_DATA_DIR / input_file
+    logger.info("Reading data from: %s", file_path)
+    df = pd.read_csv(file_path)
+    logger.info("Initial data shape: %s", df.shape)
+
+    # Initialize DataScrubber with raw data
+    scrubber = DataScrubber(df)
+
+    # Apply cleaning operations in sequence
+    scrubber.standardize_column_names()
+    scrubber.remove_duplicate_records()
+    scrubber.handle_missing_data(fill_value=0)  # Fill missing stock with 0
+    scrubber.filter_outliers(
+        "stock_level",
+        min_val=0,
+        max_val=scrubber.df["stock_level"].quantile(0.99),  # ✅ Use scrubber.df here
+    )
+
+    logger.info("=== Finished product data cleaning ===")
+    return scrubber.df
+
+
 def main() -> None:
-    logger.info("=== STARTING prepare_products_data.py ===")
-    input_file = "products_data.csv"
-    output_file = "products_prepared.csv"
+    """Execute the product data preparation process."""
+    try:
+        # Clean the data
+        df = clean_products_data()
 
-    df = read_raw_data(input_file)
-    print(f"File loaded: {not df.empty}")
-    print(f"volumns: {df.columns.tolist()}")
-    print(df.isna().sum())
+        if "supplier_tier" in df.columns:
+            tier_map = {
+                "basic": "Basic",
+                "preferred": "Preferred",
+                "premium": "Premium",
+                "standard": "Standard",
+                "unknown": "Standard",
+            }
 
-    if not df.empty and df.columns.dtype == "object":
-        df.columns = df.columns.str.strip()
+            df["supplier_tier"] = (
+                df["supplier_tier"]
+                .astype(str)
+                .str.strip()
+                .str.lower()
+                .map(tier_map)
+                .fillna("Standard")
+            )
+            logger.info("Standardized supplier tiers: %s", df["supplier_tier"].unique())
+        else:
+            logger.warning("supplier_tier column not found — skipping standardization.")
 
-    df = remove_duplicates(df)
-    df = handle_missing_values(df)
-    df = clean_values(df)
-    df = remove_outliers(df)
+        # Save results
+        output_file = PREPARED_DATA_DIR / "products_prepared.csv"
+        df.to_csv(output_file, index=False)
+        logger.info("Saved cleaned data to: %s", output_file)
 
-    save_prepared_data(df, output_file)
-    logger.info("=== FINISHED prepare_products_data.py ===")
+        logger.info("Final data shape: %s", df.shape)
+        logger.info("Unique supplier tiers: %s", df["supplier_tier"].unique())
+        logger.info("Stock level range: %d to %d", df["stock_level"].min(), df["stock_level"].max())
+
+    except Exception as e:
+        logger.error("Failed to clean product data: %s", e)
+        raise
 
 
-# ================================
-# Entry Point
-# ================================
 if __name__ == "__main__":
     main()

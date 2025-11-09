@@ -1,190 +1,126 @@
 """prepare_customers_data.py.
 
-This script reads customer data from the data/raw folder, cleans the data,
-and writes the cleaned version to the data/prepared folder.
+This script reads customer data from the data/raw folder, cleans the data using
+the DataScrubber utility, and writes the cleaned version to the data/prepared folder.
 
-Steps:
-- Remove duplicates
+Operations:
+- Standardize column names and data types
+- Remove duplicates and outliers
 - Handle missing values
-- Remove outliers
+- Standardize engagement styles
 - Save cleaned data
 """
 
-# ================================
-
-# Import from Python Standard Library
 import pathlib
 import sys
 
-# Add project root to sys.path (so local imports work)
-sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent.parent))
-
-# Import from external packages
 import pandas as pd
 
-# Import local modules
-from analytics_project.utils.logger import logger
+# Add project root to sys.path for local imports
+sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent.parent))
 
-# ================================
-# Path Setup
-# ================================
+from analytics_project.utils.logger import logger
+from analytics_project.data_preparation.data_scrubber import DataScrubber
+
+# Configure paths
 SCRIPTS_DIR = pathlib.Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPTS_DIR.parent.parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 RAW_DATA_DIR = DATA_DIR / "raw"
 PREPARED_DATA_DIR = DATA_DIR / "prepared"
 
-print(f"RAW_DATA_DIR resolved to: {RAW_DATA_DIR}")
-
 # Ensure directories exist
-DATA_DIR.mkdir(exist_ok=True)
-RAW_DATA_DIR.mkdir(exist_ok=True)
-PREPARED_DATA_DIR.mkdir(exist_ok=True)
-
-# ================================
-# Functions
-# ================================
+for directory in [DATA_DIR, RAW_DATA_DIR, PREPARED_DATA_DIR]:
+    directory.mkdir(exist_ok=True)
 
 
-def read_raw_data(file_name: str) -> pd.DataFrame:
-    file_path = RAW_DATA_DIR / file_name
-    try:
-        logger.info(f"READING: {file_path}")
-        return pd.read_csv(file_path)
-    except FileNotFoundError:
-        logger.error(f"File not found: {file_path}")
-        return pd.DataFrame()
-    except Exception as e:
-        logger.error(f"Error reading {file_path}: {e}")
-        return pd.DataFrame()
+def clean_customers_data(input_file: str = "customers_data.csv") -> pd.DataFrame:
+    """Clean customer data using DataScrubber.
 
+    Parameters
+    ----------
+    input_file : str, optional
+        Name of input file in raw data directory, by default "customers_data.csv"
 
-def save_prepared_data(df: pd.DataFrame, file_name: str) -> None:
-    file_path = PREPARED_DATA_DIR / file_name
-    logger.info(f"Saving cleaned data to: {file_path}")
-    df.to_csv(file_path, index=False)
+    Returns
+    -------
+    pd.DataFrame
+        Cleaned customer data with standardized formats and removed outliers
+    """
+    logger.info("=== Starting customer data cleaning ===")
 
+    # Read raw data
+    file_path = RAW_DATA_DIR / input_file
+    logger.info("Reading data from: %s", file_path)
+    df = pd.read_csv(file_path)
+    logger.info("Initial data shape: %s", df.shape)
+    logger.info("Loaded columns: %s", df.columns.tolist())
 
-def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
-    logger.info(f"Removing duplicates from shape: {df.shape}")
-    df_deduped = df.drop_duplicates()
-    logger.info(f"After deduplication: {df_deduped.shape}")
-    return df_deduped
+    # Log and convert empty strings before cleaning
+    empty_count = (df == "").sum().sum()
+    logger.info("Converted %d empty strings to missing values", empty_count)
 
+    scrubber = DataScrubber(df)
+    scrubber.convert_empty_strings_to_na()
 
-def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
-    logger.info(f"FUNCTION START: handle_missing_values with dataframe shape={df.shape}")
+    # Apply cleaning operations in sequence
+    scrubber.standardize_column_names()
+    scrubber.remove_duplicate_records()
+    scrubber.handle_missing_data(fill_value=0)  # Fill missing loyalty points with 0
+    scrubber.filter_outliers(
+        "loyalty_points", min_val=0, max_val=scrubber.df["loyalty_points"].quantile(0.99)
+    )
 
-    missing_before = df.isna().sum().sum()
-    logger.info(f"Total missing values before handling: {missing_before}")
-
-    if "LoyaltyPoints" in df.columns:
-        median_points = df["LoyaltyPoints"].median()
-        df.loc[:, "LoyaltyPoints"] = df["LoyaltyPoints"].fillna(median_points)
-
-    if "EngagementStyle" in df.columns and not df["EngagementStyle"].mode().empty:
-        mode_style = df["EngagementStyle"].mode()[0]
-        df.loc[:, "EngagementStyle"] = df["EngagementStyle"].fillna(mode_style)
-
-    missing_after = df.isna().sum().sum()
-    logger.info(f"Total missing values after handling: {missing_after}")
-    return df
-
-
-def clean_values(df: pd.DataFrame) -> pd.DataFrame:
-    logger.info(f"FUNCTION START: clean values with shape: {df.shape}")
-
-    # Remove negative LoyaltyPoints
-    if "LoyaltyPoints" in df.columns:
-        negative_count = (df["LoyaltyPoints"] < 0).sum()
-        df = df[df["LoyaltyPoints"] >= 0].copy()
-        logger.info(f"Removed {negative_count} rows with negative LoyaltyPoints")
-
-    # Convert LoyaltyPoints to whole numbers
-    if "LoyaltyPoints" in df.columns:
-        df["LoyaltyPoints"] = (
-            pd.to_numeric(df["LoyaltyPoints"], errors="coerce").fillna(0).astype(int)
-        )
-        logger.info("Converted LoyaltyPoints to whole numbers")
-
-    # Standardize EngagementStyle values
-    if "EngagementStyle" in df.columns:
-        style_map = {
-            "Mobile": "Mobile",
-            "Desktop": "Desktop",
-            "InStore": "InStore",
-            "Kiosk": "InStore",
-            "Tablet": "Mobile",
-        }
-        original_styles = df["EngagementStyle"].unique().tolist()
-        df["EngagementStyle"] = (
-            df["EngagementStyle"].astype(str).str.strip().map(style_map).fillna("Unknown")
-        )
-        updated_styles = df["EngagementStyle"].unique().tolist()
-        logger.info(f"Standardized EngagementStyle from {original_styles} to {updated_styles}")
-
-    return df
-
-
-def remove_outliers(df: pd.DataFrame) -> pd.DataFrame:
-    logger.info(f"Removing outliers from shape: {df.shape}")
-    if "LoyaltyPoints" in df.columns:
-        mean = df["LoyaltyPoints"].mean()
-        std = df["LoyaltyPoints"].std()
-        lower = mean - 3 * std
-        upper = mean + 3 * std
-        original_count = len(df)
-        df = df[df["LoyaltyPoints"] >= 0]
-        df = df[df["LoyaltyPoints"].between(lower, upper)]
-        removed = original_count - len(df)
-        logger.info(f"Outliers removed: {removed}")
-    return df
-
-
-# ================================
-# Main
-# ================================
+    logger.info("=== Finished customer data cleaning ===")
+    return scrubber.df
 
 
 def main() -> None:
-    logger.info("=== STARTING prepare_customers_data.py ===")
-    input_file = "customers_data.csv"
-    output_file = "customers_prepared.csv"
+    """Execute the customer data preparation process."""
+    try:
+        # Clean the data
+        df = clean_customers_data()
 
-    df = read_raw_data(input_file)
-    print(f"File loaded: {not df.empty}")
-    print(f"Columns: {df.columns.tolist()}")
-    print(df.isna().sum())
+        if "engagement_style" in df.columns:
+            style_map = {
+                "mobile": "Mobile",
+                "tablet": "Mobile",
+                "desktop": "Desktop",
+                "instore": "InStore",
+                "kiosk": "InStore",
+            }
 
-    if not df.empty and df.columns.dtype == "object":
-        df.columns = df.columns.str.strip()
+            df["engagement_style"] = (
+                df["engagement_style"]
+                .astype(str)
+                .str.strip()
+                .str.lower()
+                .map(style_map)
+                .fillna("Unknown")
+            )
+            logger.info("Standardized engagement styles: %s", df["engagement_style"].unique())
+        else:
+            logger.warning("engagement_style column not found — skipping standardization.")
 
-    df = remove_duplicates(df)
-    print("\n🔍 After remove_duplicates:")
-    print(df["LoyaltyPoints"].describe())
-    print(df["EngagementStyle"].value_counts(dropna=False))
+        # Remove negative loyalty points
+        scrubber = DataScrubber(df)
+        scrubber.remove_negative_values("loyalty_points")
 
-    df = handle_missing_values(df)
-    print("\n🔍 After handle_missing_values:")
-    print("Missing LoyaltyPoints:", df["LoyaltyPoints"].isna().sum())
-    print("Missing EngagementStyle:", df["EngagementStyle"].isna().sum())
+        # Save results
+        output_file = PREPARED_DATA_DIR / "customers_prepared.csv"
+        df.to_csv(output_file, index=False)
+        logger.info("Saved cleaned data to: %s", output_file)
 
-    df = clean_values(df)
-    print("\n🔍 After clean_values:")
-    print("Min LoyaltyPoints:", df["LoyaltyPoints"].min())
-    print("EngagementStyle values:", df["EngagementStyle"].unique())
-
-    df = remove_outliers(df)
-    print("\n🔍 After remove_outliers:")
-    print("Min LoyaltyPoints:", df["LoyaltyPoints"].min())
-    print("EngagementStyle values:", df["EngagementStyle"].unique())
-
-    save_prepared_data(df, output_file)
-    logger.info("=== FINISHED prepare_customers_data.py ===")
+        # Log summary statistics
+        logger.info("Final data shape: %s", df.shape)
+        logger.info("Unique engagement styles: %s", df["engagement_style"].unique())
+        logger.info(
+            "Loyalty points range: %d to %d", df["loyalty_points"].min(), df["loyalty_points"].max()
+        )
+    except Exception as e:
+        logger.error("Failed to clean customer data: %s", e)
+        raise
 
 
-# ================================
-# Entry Point
-# ================================
 if __name__ == "__main__":
     main()
