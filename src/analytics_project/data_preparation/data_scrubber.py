@@ -16,6 +16,8 @@ import pandas as pd
 from pathlib import Path
 import re
 
+from analytics_project.utils.logger import logger
+
 __all__ = ["DataScrubber"]
 
 
@@ -293,5 +295,35 @@ class DataScrubber:
                 f"[Scrubber] Overriding {invalid_mask.sum()} invalid '{column}' values with '{fixed_date}'."
             )
             self.df.loc[invalid_mask, column] = fixed_date
+
+        return self.df
+
+    def correct_zero_sales_discount(self) -> pd.DataFrame:
+        """Update discount_percent to 100 where sale_amount is 0.00 and discount is missing or invalid."""
+
+        # Step 1: Normalize types
+        self.df["sale_amount"] = pd.to_numeric(self.df["sale_amount"], errors="coerce")
+        self.df["discount_percent"] = pd.to_numeric(self.df["discount_percent"], errors="coerce")
+
+        # Step 2: Define correction condition
+        condition = (self.df["sale_amount"] == 0.0) & (
+            (self.df["discount_percent"].isna()) | (self.df["discount_percent"] < 100.0)
+        )
+
+        # Step 3: Apply correction
+        updated_count = condition.sum()
+        self.df.loc[condition, "discount_percent"] = 100.0
+
+        # Step 4: Log result
+        try:
+            from analytics_project.utils.logger import logger
+
+            logger.info(
+                f"Updated {updated_count} rows: sale_amount = 0.00 → discount_percent set to 100.0"
+            )
+        except ImportError:
+            print(
+                f"Updated {updated_count} rows: sale_amount = 0.00 → discount_percent set to 100.0"
+            )
 
         return self.df

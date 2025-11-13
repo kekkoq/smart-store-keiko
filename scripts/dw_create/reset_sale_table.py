@@ -22,8 +22,8 @@ CREATE TABLE sale (
 """)
 
 # Load cleaned data
-df = pd.read_csv("data/prepared/customers_prepared.csv")
-df.to_sql("customer", conn, if_exists="append", index=False)
+df = pd.read_csv("data/prepared/sales_data_prepared.csv")
+df.to_sql("sale", conn, if_exists="append", index=False)
 
 conn.commit()
 conn.close()

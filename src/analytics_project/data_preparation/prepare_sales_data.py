@@ -78,6 +78,7 @@ def clean_sales_data(input_file: str = "sales_data.csv") -> pd.DataFrame:
     scrubber.parse_date_column("sale_date", new_column="sale_date")
     scrubber.filter_outliers("discount_percent", 0, 100)
     scrubber.override_invalid_dates("sale_date", fixed_date="2025-05-04")
+    scrubber.correct_zero_sales_discount()
 
     # Convert sale_amount to float before filtering
     if "sale_amount" in scrubber.df.columns:

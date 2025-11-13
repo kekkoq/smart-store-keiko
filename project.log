@@ -1,22 +1,23 @@
-2025-11-12 13:30:INFO    AT logger.py:103: Logging to file: C:\Repos\smart-store-keiko\project.log
-2025-11-12 13:30:INFO    AT prepare_sales_data.py:128: Starting sales data preparation process
-2025-11-12 13:30:INFO    AT prepare_sales_data.py:61: === Starting sales data cleaning ===
-2025-11-12 13:30:INFO    AT prepare_sales_data.py:65: Reading data from: %s
-2025-11-12 13:30:INFO    AT prepare_sales_data.py:67: Initial data shape: %s
-2025-11-12 13:30:INFO    AT prepare_sales_data.py:72: After standardization: %s
-2025-11-12 13:30:INFO    AT prepare_sales_data.py:102: Safely converted 'campaign_id' to integer format, preserving 0 as 'no campaign'
-2025-11-12 13:30:INFO    AT prepare_sales_data.py:109: Data info:
+2025-11-12 20:06:INFO    AT logger.py:104: Logging to file: C:\Repos\smart-store-keiko\project.log
+2025-11-12 20:06:INFO    AT prepare_sales_data.py:129: Starting sales data preparation process
+2025-11-12 20:06:INFO    AT prepare_sales_data.py:62: === Starting sales data cleaning ===
+2025-11-12 20:06:INFO    AT prepare_sales_data.py:66: Reading data from: %s
+2025-11-12 20:06:INFO    AT prepare_sales_data.py:68: Initial data shape: %s
+2025-11-12 20:06:INFO    AT prepare_sales_data.py:73: After standardization: %s
+2025-11-12 20:06:INFO    AT data_scrubber.py:321: Updated 266 rows: sale_amount = 0.00 → discount_percent set to 100.0
+2025-11-12 20:06:INFO    AT prepare_sales_data.py:103: Safely converted 'campaign_id' to integer format, preserving 0 as 'no campaign'
+2025-11-12 20:06:INFO    AT prepare_sales_data.py:110: Data info:
 %s
-2025-11-12 13:30:INFO    AT prepare_sales_data.py:110: Data summary:
+2025-11-12 20:06:INFO    AT prepare_sales_data.py:111: Data summary:
 %s
-2025-11-12 13:30:INFO    AT prepare_sales_data.py:111: === Finished sales data cleaning ===
-2025-11-12 13:30:INFO    AT prepare_sales_data.py:132: Final column names in main(): %s
-2025-11-12 13:30:INFO    AT prepare_sales_data.py:133: Standardized columns: %s
-2025-11-12 13:30:INFO    AT prepare_sales_data.py:148: Standardized payment methods: %s
-2025-11-12 13:30:INFO    AT prepare_sales_data.py:162: Cleaned sale_amount column — min: %.2f, max: %.2f
-2025-11-12 13:30:INFO    AT prepare_sales_data.py:171: Converted %d empty strings to missing values
-2025-11-12 13:30:INFO    AT prepare_sales_data.py:183: Saved cleaned data to: %s
-2025-11-12 13:30:INFO    AT prepare_sales_data.py:186: Final data shape: %s
-2025-11-12 13:30:INFO    AT prepare_sales_data.py:188: Unique payment methods: %s
-2025-11-12 13:30:INFO    AT prepare_sales_data.py:190: Sale amount range: %.2f to %.2f
-2025-11-12 13:30:INFO    AT prepare_sales_data.py:196: Sales data preparation completed successfully
+2025-11-12 20:06:INFO    AT prepare_sales_data.py:112: === Finished sales data cleaning ===
+2025-11-12 20:06:INFO    AT prepare_sales_data.py:133: Final column names in main(): %s
+2025-11-12 20:06:INFO    AT prepare_sales_data.py:134: Standardized columns: %s
+2025-11-12 20:06:INFO    AT prepare_sales_data.py:149: Standardized payment methods: %s
+2025-11-12 20:06:INFO    AT prepare_sales_data.py:163: Cleaned sale_amount column — min: %.2f, max: %.2f
+2025-11-12 20:06:INFO    AT prepare_sales_data.py:172: Converted %d empty strings to missing values
+2025-11-12 20:06:INFO    AT prepare_sales_data.py:184: Saved cleaned data to: %s
+2025-11-12 20:06:INFO    AT prepare_sales_data.py:187: Final data shape: %s
+2025-11-12 20:06:INFO    AT prepare_sales_data.py:189: Unique payment methods: %s
+2025-11-12 20:06:INFO    AT prepare_sales_data.py:191: Sale amount range: %.2f to %.2f
+2025-11-12 20:06:INFO    AT prepare_sales_data.py:197: Sales data preparation completed successfully

@@ -265,38 +265,7 @@ This project implements a modular ETL pipeline to transform raw retail data into
 #### 1. Original Raw Schema
 The raw data files contained rich transactional and entity-level information. Below is a summary of the original columns before transformation:
 
-Customers:
-
-Column Name	      Data Type	      Description
-customer_id	      INT	            primay key
-name	            VARCHAR(100)	  customer name
-region	          VARCHAR(50)	    region customer resides
-join_date	        DATE	          date customer joined
-loyalty_points	  INT	current     loyalty points
-engagement_style  VARCHAR(50)	    engagement channel
-
-Products:
-
-Column Name	      Data Type	      Description
-product_id	      INT	region c    ustomer resides
-product_name	    VARCHAR(100)	  primay key
-category	        VARCHAR(50)	    name of product
-unit_price	      DECIMAL(10,2)	  price per product
-stock_level	      INT	current     inventory unit
-supplier_tier	    VARCHAR(50)	    supplier class
-
-Sales:
-Column Name	      Data Type	       Description
-transaction_id	  INT	unique       ID of transaction
-sale_date	        DATE	           date of sale
-customer_id	      INT	             foreign key to customers
-product_id	      INT	             foreign key to products
-store_id	        INT	             foreign key to stores
-campaign_id	      INT	             foreign key to campaign
-sale_amount	      DECIMAL(10,2)	   amount of sale
-discount_percent	DECIMAL(5,2)	   percent of discount
-payment_method	  VARCHAR(50)	     method of payment
-
+![Excel Snapshot of Sales Table](images/original_schema.png)
 
 ### 2. ETL Transformations
 During the ETL process, several columns were removed or transformed to align with the simplified schema and support SQL join practice:
