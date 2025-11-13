@@ -12,21 +12,19 @@ Operations:
 - Save cleaned data
 """
 
-import pathlib
+from analytics_project.utils.logger import init_logger, logger, project_root
+
+init_logger(level="INFO")
+
 import sys
-
 import pandas as pd
-
-# Add project root to sys.path for local imports
-sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent.parent))
-
-from analytics_project.utils.logger import logger
 from analytics_project.data_preparation.data_scrubber import DataScrubber
 
+# Add project root to sys.path for local imports
+sys.path.append(str(project_root))
+
 # Configure paths
-SCRIPTS_DIR = pathlib.Path(__file__).resolve().parent
-PROJECT_ROOT = SCRIPTS_DIR.parent.parent.parent
-DATA_DIR = PROJECT_ROOT / "data"
+DATA_DIR = project_root / "data"
 RAW_DATA_DIR = DATA_DIR / "raw"
 PREPARED_DATA_DIR = DATA_DIR / "prepared"
 
@@ -52,13 +50,6 @@ def save_prepared_data(df: pd.DataFrame, file_name: str) -> None:
     file_path = PREPARED_DATA_DIR / file_name
     logger.info(f"Saving cleaned data to: {file_path}")
     df.to_csv(file_path, index=False)
-
-
-def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
-    logger.info(f"Removing duplicates from shape: {df.shape}")
-    df_deduped = df.drop_duplicates()
-    logger.info(f"After deduplication: {df_deduped.shape}")
-    return df_deduped
 
 
 def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
@@ -162,12 +153,18 @@ def clean_products_data(input_file: str = "products_data.csv") -> pd.DataFrame:
 
     # Apply cleaning operations in sequence
     scrubber.standardize_column_names()
-    scrubber.remove_duplicate_records()
-    scrubber.handle_missing_data(fill_value=0)  # Fill missing stock with 0
+    scrubber.remove_duplicate_records(subset="product_id")
+    scrubber.handle_missing_data(fill_value=0)
+    # Clean specific columns
+    scrubber.df = scrubber.df.replace([float("inf"), float("-inf")], 0)
+    # Convert stock_level to integer
+    scrubber.convert_column_type("stock_level", int)
+    logger.info("Converted stock_level to integer format.")
+    # Fillter out unrealistic stock levels after conversion
     scrubber.filter_outliers(
         "stock_level",
         min_val=0,
-        max_val=scrubber.df["stock_level"].quantile(0.99),  # ✅ Use scrubber.df here
+        max_val=scrubber.df["stock_level"].quantile(0.99),
     )
 
     logger.info("=== Finished product data cleaning ===")

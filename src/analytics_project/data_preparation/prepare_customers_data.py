@@ -11,21 +11,19 @@ Operations:
 - Save cleaned data
 """
 
-import pathlib
+from analytics_project.utils.logger import init_logger, logger, project_root
+
+init_logger(level="INFO")
+
 import sys
-
 import pandas as pd
-
-# Add project root to sys.path for local imports
-sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent.parent))
-
-from analytics_project.utils.logger import logger
 from analytics_project.data_preparation.data_scrubber import DataScrubber
 
+# Add project root to sys.path for local imports
+sys.path.append(str(project_root))
+
 # Configure paths
-SCRIPTS_DIR = pathlib.Path(__file__).resolve().parent
-PROJECT_ROOT = SCRIPTS_DIR.parent.parent.parent
-DATA_DIR = PROJECT_ROOT / "data"
+DATA_DIR = project_root / "data"
 RAW_DATA_DIR = DATA_DIR / "raw"
 PREPARED_DATA_DIR = DATA_DIR / "prepared"
 
@@ -65,13 +63,16 @@ def clean_customers_data(input_file: str = "customers_data.csv") -> pd.DataFrame
 
     # Apply cleaning operations in sequence
     scrubber.standardize_column_names()
-    scrubber.remove_duplicate_records()
+    scrubber.remove_duplicate_records(subset="customer_id")
+    scrubber.standardize_categorical_column("region")
     scrubber.handle_missing_data(fill_value=0)  # Fill missing loyalty points with 0
     scrubber.filter_outliers(
         "loyalty_points", min_val=0, max_val=scrubber.df["loyalty_points"].quantile(0.99)
     )
-
+    scrubber.convert_column_type("loyalty_points", int)
+    logger.info("Converted loyalty_points to integer format.")
     logger.info("=== Finished customer data cleaning ===")
+
     return scrubber.df
 
 

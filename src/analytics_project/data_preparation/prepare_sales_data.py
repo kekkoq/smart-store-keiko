@@ -12,21 +12,19 @@ Operations:
 - Save cleaned data
 """
 
-import pathlib
+from analytics_project.utils.logger import init_logger, logger, project_root
+
+init_logger(level="INFO")
+
 import sys
-
 import pandas as pd
-
-# Add project root to sys.path for local imports
-sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent.parent))
-
-from analytics_project.utils.logger import logger
 from analytics_project.data_preparation.data_scrubber import DataScrubber
 
+# Add project root to sys.path for local imports
+sys.path.append(str(project_root))
+
 # Configure paths
-SCRIPTS_DIR = pathlib.Path(__file__).resolve().parent
-PROJECT_ROOT = SCRIPTS_DIR.parent.parent.parent
-DATA_DIR = PROJECT_ROOT / "data"
+DATA_DIR = project_root / "data"
 RAW_DATA_DIR = DATA_DIR / "raw"
 PREPARED_DATA_DIR = DATA_DIR / "prepared"
 
@@ -78,6 +76,8 @@ def clean_sales_data(input_file: str = "sales_data.csv") -> pd.DataFrame:
     scrubber.handle_missing_data(drop=True)
     # Parse sale date
     scrubber.parse_date_column("sale_date", new_column="sale_date")
+    scrubber.filter_outliers("discount_percent", 0, 100)
+    scrubber.override_invalid_dates("sale_date", fixed_date="2025-05-04")
 
     # Convert sale_amount to float before filtering
     if "sale_amount" in scrubber.df.columns:
@@ -96,8 +96,10 @@ def clean_sales_data(input_file: str = "sales_data.csv") -> pd.DataFrame:
 
     # Convert campaign_id if present
     if "campaign_id" in scrubber.df.columns:
-        scrubber.convert_column_type("campaign_id", int)
-        logger.info("Converted campaign_id to integers")
+        scrubber.df["campaign_id"] = pd.to_numeric(
+            scrubber.df["campaign_id"], errors="coerce"
+        ).astype("Int64")  # Nullable integer type
+    logger.info("Safely converted 'campaign_id' to integer format, preserving 0 as 'no campaign'")
 
     # Get cleaned data
     df_cleaned = scrubber.df
@@ -176,7 +178,7 @@ def main() -> None:
         PREPARED_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
         # Save results
-        output_file = PREPARED_DATA_DIR / "sales_prepared.csv"
+        output_file = PREPARED_DATA_DIR / "sales_data_prepared.csv"
         df.to_csv(output_file, index=False)
         logger.info("Saved cleaned data to: %s", output_file)
 

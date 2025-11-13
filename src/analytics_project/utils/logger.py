@@ -4,8 +4,8 @@ This module configures project-wide logging to track events, debug issues,
 and maintain audit trails during data analysis workflows.
 
 Module Information:
-    - Filename: utils_logger.py
-    - Module: utils_logger
+    - Filename: logger.py
+    - Module: logger
     - Location: src/analytics_project/
 
 Key Concepts:
@@ -127,4 +127,4 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-__all__ = ["get_log_file_path", "init_logger", "log_example", "logger"]
+__all__ = ["get_log_file_path", "init_logger", "log_example", "logger", "project_root"]

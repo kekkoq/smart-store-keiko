@@ -51,9 +51,25 @@ class DataScrubber:
         self.df.columns = [camel_to_snake(col) for col in self.df.columns]
         return self.df
 
-    def remove_duplicate_records(self) -> pd.DataFrame:
-        """Drop duplicate rows from the DataFrame."""
-        self.df = self.df.drop_duplicates()
+    def standardize_categorical_column(self, column: str) -> pd.DataFrame:
+        """Standardize categorical values by stripping whitespace and title-casing."""
+        self.df[column] = (
+            self.df[column]
+            .astype(str)
+            .str.strip()
+            .str.title()  # Converts 'east' → 'East', 'SOUTH-WEST' → 'South-West'
+        )
+        return self.df
+
+    def remove_duplicate_records(self, subset=None) -> pd.DataFrame:
+        """Drop duplicate rows from the DataFrame. Optionally specify a subset of columns to check."""
+        if subset:
+            dupes = self.df[self.df.duplicated(subset=subset, keep=False)]
+            if not dupes.empty:
+                print(f"Duplicate rows based on {subset}:\n", dupes)
+            self.df = self.df.drop_duplicates(subset=subset, keep="first")
+        else:
+            self.df = self.df.drop_duplicates()
         return self.df
 
     def save(self, path: str | Path) -> None:
@@ -178,7 +194,13 @@ class DataScrubber:
         """
         if column not in self.df.columns:
             raise ValueError(f"Column '{column}' not found.")
+        self.df[column] = pd.to_numeric(self.df[column], errors="coerce")
+        before = len(self.df)
         self.df = self.df[(self.df[column] >= min_val) & (self.df[column] <= max_val)]
+        after = len(self.df)
+        print(
+            f"[filter_outliers] Removed {before - after} rows from '{column}' outside [{min_val}, {max_val}]"
+        )
         return self.df
 
     def convert_column_type(self, column: str, dtype: type) -> pd.DataFrame:
@@ -257,4 +279,19 @@ class DataScrubber:
             The DataFrame with empty strings replaced by NaN.
         """
         self.df = self.df.replace("", pd.NA)
+        return self.df
+
+    def override_invalid_dates(
+        self, column: str = "SaleDate", fixed_date: str = "2025-05-04"
+    ) -> pd.DataFrame:
+        """Replace invalid or missing dates with a fixed value."""
+        parsed_dates = pd.to_datetime(self.df[column], errors="coerce")
+        invalid_mask = parsed_dates.isna()
+
+        if invalid_mask.any():
+            print(
+                f"[Scrubber] Overriding {invalid_mask.sum()} invalid '{column}' values with '{fixed_date}'."
+            )
+            self.df.loc[invalid_mask, column] = fixed_date
+
         return self.df

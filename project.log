@@ -1,9 +1,22 @@
-2025-11-07 18:37:INFO    AT logger.py:104: Logging to file: C:\Repos\smart-store-keiko\project.log
-2025-11-07 18:37:INFO    AT logger.py:115: This is an example info message.
-2025-11-07 18:37:WARNING AT logger.py:116: This is an example warning message.
-2025-11-07 18:37:ERROR   AT logger.py:117: This is an example error message.
-2025-11-07 18:37:INFO    AT logger.py:115: This is an example info message.
-2025-11-07 18:37:WARNING AT logger.py:116: This is an example warning message.
-2025-11-07 18:37:ERROR   AT logger.py:117: This is an example error message.
-2025-11-07 18:37:INFO    AT logger.py:124: View the log output at C:\Repos\smart-store-keiko\project.log
-2025-11-07 18:37:INFO    AT test_utils_logger.py:65: Smoke test message
+2025-11-12 13:30:INFO    AT logger.py:103: Logging to file: C:\Repos\smart-store-keiko\project.log
+2025-11-12 13:30:INFO    AT prepare_sales_data.py:128: Starting sales data preparation process
+2025-11-12 13:30:INFO    AT prepare_sales_data.py:61: === Starting sales data cleaning ===
+2025-11-12 13:30:INFO    AT prepare_sales_data.py:65: Reading data from: %s
+2025-11-12 13:30:INFO    AT prepare_sales_data.py:67: Initial data shape: %s
+2025-11-12 13:30:INFO    AT prepare_sales_data.py:72: After standardization: %s
+2025-11-12 13:30:INFO    AT prepare_sales_data.py:102: Safely converted 'campaign_id' to integer format, preserving 0 as 'no campaign'
+2025-11-12 13:30:INFO    AT prepare_sales_data.py:109: Data info:
+%s
+2025-11-12 13:30:INFO    AT prepare_sales_data.py:110: Data summary:
+%s
+2025-11-12 13:30:INFO    AT prepare_sales_data.py:111: === Finished sales data cleaning ===
+2025-11-12 13:30:INFO    AT prepare_sales_data.py:132: Final column names in main(): %s
+2025-11-12 13:30:INFO    AT prepare_sales_data.py:133: Standardized columns: %s
+2025-11-12 13:30:INFO    AT prepare_sales_data.py:148: Standardized payment methods: %s
+2025-11-12 13:30:INFO    AT prepare_sales_data.py:162: Cleaned sale_amount column — min: %.2f, max: %.2f
+2025-11-12 13:30:INFO    AT prepare_sales_data.py:171: Converted %d empty strings to missing values
+2025-11-12 13:30:INFO    AT prepare_sales_data.py:183: Saved cleaned data to: %s
+2025-11-12 13:30:INFO    AT prepare_sales_data.py:186: Final data shape: %s
+2025-11-12 13:30:INFO    AT prepare_sales_data.py:188: Unique payment methods: %s
+2025-11-12 13:30:INFO    AT prepare_sales_data.py:190: Sale amount range: %.2f to %.2f
+2025-11-12 13:30:INFO    AT prepare_sales_data.py:196: Sales data preparation completed successfully

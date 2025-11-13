@@ -20,8 +20,6 @@ import pandas as pd
 # Local imports
 from .utils_logger import logger, project_root
 
-# ...existing code...from .utils_logger import logger, project_root
-
 # Set up paths as constants
 DATA_DIR: pathlib.Path = project_root.joinpath("data")
 RAW_DATA_DIR: pathlib.Path = DATA_DIR.joinpath("raw")
@@ -84,7 +82,7 @@ def enrich_customers(path):
     df.loc[2, "EngagementStyle"] = "Kiosk"
 
     df.to_csv(path, index=False)
-    print(f"✅ Enriched: {path.name}")
+    print(f" Enriched: {path.name}")
 
 
 def enrich_products(path):

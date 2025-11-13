@@ -1,5 +1,4 @@
 transaction_id,sale_date,customer_id,product_id,store_id,campaign_id,sale_amount,discount_percent,payment_method
-1,2025-05-04,1034,2059,402,0,2048.2,150.0,PayPal
 2,2025-05-04,1066,2048,403,1,321.87,11.82,Credit Card
 4,2025-05-04,1071,2096,404,2,1613.23,29.53,GiftCard
 5,2025-05-04,1020,2060,401,0,408.38,14.18,Credit Card
@@ -21,7 +20,7 @@ transaction_id,sale_date,customer_id,product_id,store_id,campaign_id,sale_amount
 27,2025-05-04,1142,2001,402,0,1237.05,20.75,Credit Card
 28,2025-05-04,1061,2092,404,3,482.21,3.37,PayPal
 29,2025-05-04,1142,2097,402,3,4210.5,13.22,PayPal
-31,,1004,2011,403,1,737.53,11.71,PayPal
+31,2025-05-04,1004,2011,403,1,737.53,11.71,PayPal
 33,2025-05-04,1169,2074,403,3,0.0,4.87,Credit Card
 35,2025-05-04,1190,2070,403,2,54.69,14.79,PayPal
 36,2025-05-04,1179,2058,403,2,1066.8,1.55,GiftCard
