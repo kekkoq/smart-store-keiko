@@ -106,7 +106,6 @@ data/temp/
 # Visual outputs
 # ----------------------------------------
 figures/
-*.png
 *.jpg
 *.svg
 
