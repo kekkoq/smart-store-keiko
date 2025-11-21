@@ -1,5 +1,4 @@
-"""
-scripts/dw_create/create_dw_sqlite.py
+"""scripts/dw_create/create_dw_sqlite.py
 
 This script creates the SQLite data warehouse using .sql files.
 
@@ -18,8 +17,8 @@ Complete the TODOs to create and populate a SQLite data warehouse.
 
 # import from Python standard libraries
 import pathlib
-import sys
 import sqlite3
+import sys
 
 # import from external libraries
 import pandas as pd
@@ -64,7 +63,7 @@ def run_sql_file(conn, file_path: pathlib.Path) -> None:
     """Run a SQL script file using the given connection."""
     logger.info(f"RUN: {file_path}")
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             sql = f.read()
             conn.executescript(sql)
     except Exception as e:

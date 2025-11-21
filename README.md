@@ -216,6 +216,49 @@ uv pip install -r requirements.txt
 $env:PYTHONPATH = "$PWD/src"
 pytest --cov=src --cov-report=term-missing
 
+### 3.8 Challenges
+
+1. Pytest Setup and Troubleshooting
+During initial setup, pytest failed to discover and execute tests due to environment inconsistencies and import resolution issues. These were resolved through the following steps:
+✅ Fixes Applied
+- Interpreter mismatch: Ensured the correct Python interpreter (analytics-project) was selected and activated
+- Import errors: Standardized relative imports across modules and verified __init__.py presence in test directories
+- Environment isolation: Created a dedicated virtual environment and installed dependencies via requirements.txt
+- Test discovery: Renamed test files and functions to follow pytest conventions (test_*.py, def test_*)
+- Path resolution: Used sys.path.append() in conftest.py to ensure test modules could locate source file
+
+2. Status Bar Not Visible in VS Code
+In some environments, the Visual Studio Code status bar may fail to appear even when:
+- Zen Mode and Full Screen are disabled
+- "workbench.statusBar.visible": true is set in settings.json
+- The Python extension is installed and active
+- A valid interpreter is selected via Python: Select Interpreter
+This issue does not affect script execution. Python files can still be run via the terminal or notebook interface, and environment activation works as expected.
+
+3. Jupyter Kernel Not Detected in VS Code
+Issue Summary
+After migrating to a new machine, the Jupyter notebook interface in VS Code failed to detect the registered Python kernel from the project’s virtual environment (.venv). Despite the environment being correctly set up and ipykernel installed, the kernel picker showed no valid options, and notebook cells could not be executed.
+Environment
+- Windows 11
+- VS Code (latest version)
+- Python 3.12.12
+- Virtual environment: .venv in project root
+- Required packages installed: ipykernel, pandas, etc.
+Symptoms
+- Kernel picker shows “No Kernel” or only “Python Environments…”
+- Jupyter: Clear Jupyter Server URI Storage command not available
+- Notebook cells do not run
+- Reinstalling Python and Jupyter extensions does not resolve the issue
+Resolution Steps
+- Uninstall and reinstall the Python extension
+- Open Extensions panel (Ctrl+Shift+X)
+- Uninstall Python (Microsoft)
+- Restart VS Code
+- Reinstall Python extension
+- Manually select interpreter for notebook
+- Open notebook (.ipynb)
+- Click kernel picker → choose:
+
 ## 4.1 Data Cleaning with DataScrubber
 
 This project includes a modular data cleaning pipeline using the DataScrubber class, located in
@@ -259,15 +302,18 @@ Note: The `DataScrubber` class is a reusable library module that provides the co
 functionality. It is not meant to be run directly but is imported by the preparation scripts.
 
 
-## 5.1 ETL Design Overview
+## 5 ETL Design Overview
+
 This project implements a modular ETL pipeline to transform raw retail data into a structured SQLite data warehouse for downstream analytics. The design emphasizes schema integrity, reproducibility, and SQL join practice using mock reference tables.
 
-#### 1. Original Raw Schema
+#### 5.1 Original Raw Schema
+
 The raw data files contained rich transactional and entity-level information. Below is a summary of the original columns before transformation:
 
 ![Excel Snapshot of Sales Table](images/original_schema.png)
 
-### 2. ETL Transformations
+### 5.2 ETL Transformations
+
 During the ETL process, several columns were removed or transformed to align with the simplified schema and support SQL join practice:
 
 🔻 Removed Columns
@@ -277,7 +323,7 @@ During the ETL process, several columns were removed or transformed to align wit
 🔺 Added Mock Tables
     To support SQL join practice and campaign attribution analysis, two mock reference tables were added
 
-These tables were populated at the excution of the ETL process.
+These tables were populated at the execution of the ETL process.
 
 Table: customer
   - customer_id
@@ -328,14 +374,15 @@ Query example:
   2  South-West  Phoenix Outfitters    334159.56
   3        West   Los Angeles Plaza    314082.10
 
-#### 3. ETL Highlights
+#### 5.3 ETL Highlights
 
 - Schema Alignment: All foreign key fields were validated and coerced to integer types (Int64) to ensure join safety.
 - Date Randomization: sale_date values were randomized across a 6-month range to simulate temporal variation.
 - Selective Column Retention: Only analytics-relevant fields were retained to simplify schema and focus on campaign/store joins.
 
 
-### 4. SQLite Extension Limitation in VS Code
+### 5.4 SQLite Extension Limitation in VS Code
+
 Despite reinstalling the SQLite extension in Visual Studio Code, the expected interface features — such as the "Open Database" option in right-click context menu — did not appear. This prevented direct interaction with .db files through the extension UI.
 As a workaround, all SQL operations (including schema creation, data inspection, and joins) were executed using Python scripts via sqlite3 and pandas. This approach ensured full control over database interactions and reproducibility across environments.
 
@@ -344,6 +391,76 @@ As a workaround, all SQL operations (including schema creation, data inspection,
   - SQL Scripts are written in /dw_create/smart_sales_analysis.py.
 - Data validation and joins are tested using Python-based queries instead of relying on extension-based exploration
 This approach maintains full functionality and avoids reliance on potentially unstable IDE extensions.
+
+## 6 Power BI Integration, Dashboard Creation, Analysis
+
+### 6.1 Connecting the Database
+
+- The smart_sales.db SQLite warehouse was connected to Power BI using an ODBC driver.
+- This allowed direct access to the fact (sale) and dimension tables (store, campaign, customer, product) for analysis.
+
+### 6.2 Writing SQL in Power Query
+
+- Within Power Query, custom SQL queries were written to shape the data before loading into the model.
+- Key queries included:
+  - Total Sales by Company: aggregated sales across all stores.
+  - Total Sales by Store: grouped sales by individual store for comparison.
+
+### 6.3 Dashboards with OLAP Techniques
+
+1. Using OLAP concepts (slicing, dicing, and drill-down), interactive dashboards were created:
+- Total Sales by Month: trend analysis
+- Total Sales by Region and Campaign
+- Store Slicer: enabled filtering by store to view:
+  - Total sales per campaign
+  - Total sales by engagement style (Instore, Mobile, Desktop) within each store
+
+1. Dashboards
+
+
+2. analysis for each dashboard
+
+  1. Total Sales by Month: trend analysis
+   - Seasonal Dip: There’s a noticeable drop in sales around July 2025, which could indicate a seasonal slowdown, inventory   issue
+   - Strong Recovery: Sales spike sharply in October 2025, possibly due to a successful campaign, product launch, or holiday prep.
+   - Forecast Uncertainty: The forecast sales from January to March 2026 shows expected growth but with uncertainty.
+   - Average sales: $113,956; hightest sales: $135,093 - can be used as a target line for next campaign; lowest sales: $92,492 - may require to investigate the causes.
+
+![Total Sales by Month](images/total_sales_by_month.png)
+
+  2. Total Sales by Region and Campaign (New Year Kickoff, Summer Sale, Holiday Promo, Back to School)
+    Top Campaigns: Holiday Promo consistently outperforms other campaigns across all regions.
+   - East: 115K
+   - North: 121K
+   - South-West: 97K
+   - West: 92K
+-
+    Regional Strengths
+  - South-West shows steady performance.
+  - North and East performed strong, with all campaigns above 72K.
+  - West did underperformed in all campaigns.
+  - Back to School campaign underperformed across all regions.
+  - By contrast, Holiday Promo and Back to School contributed relatively little across all regions, highlighting weaker engagement compared to other campaigns.
+
+![Total Sales by Region and Campaign](images/total_sales_by_region_campaign.png)
+
+
+  3. Total sales per campaign/Total sales by engagement style (Instore, Mobile, Desktop) within each store
+  - New Year kickoff emerged as the most successful campaign overall.
+  - The Mobile channel was the most popular shopping method, followed by Desktop, confirming the growing dominance of online shopping
+  - At the Downtown Seattle store, New Year Kickoff led 121k in sales while other campaigns ranged between $72k - $88k range.
+  - At the New York uptown, Summer Sale outperformed, reaching $115k, surpassing all other campaigns in that location.
+  - The Los Angeles Plaza and the Phoenix Outfitters showed the similar patterns with strong performance in both Summer Sale and New Year Kickoff.
+
+![Total Sales per Campaign/Total Sales by Engagement Style](images/total_sales_drill_down.png)
+
+### 6.4 Challenges
+
+- During cube building and Power BI integration, inconsistencies were discovered in the prepared datasets:
+  - Some product_id values in the sale table did not exist in the product dimension.
+  - Some customer_id values in the sale table did not exist in the customer dimension.
+- When merged, these mismatches resulted in Unknown/Undefined values in the cube and dashboards.
+- This highlighted the importance of data validation and integrity checks during ETL and before OLAP cubing.
 
 
 

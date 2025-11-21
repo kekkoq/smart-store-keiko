@@ -17,7 +17,9 @@ from analytics_project.utils.logger import init_logger, logger, project_root
 init_logger(level="INFO")
 
 import sys
+
 import pandas as pd
+
 from analytics_project.data_preparation.data_scrubber import DataScrubber
 
 # Add project root to sys.path for local imports

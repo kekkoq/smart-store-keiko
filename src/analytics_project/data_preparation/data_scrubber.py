@@ -12,11 +12,10 @@ DataScrubber
 """
 
 import io
-import pandas as pd
 from pathlib import Path
 import re
 
-from analytics_project.utils.logger import logger
+import pandas as pd
 
 __all__ = ["DataScrubber"]
 
@@ -300,7 +299,6 @@ class DataScrubber:
 
     def correct_zero_sales_discount(self) -> pd.DataFrame:
         """Update discount_percent to 100 where sale_amount is 0.00 and discount is missing or invalid."""
-
         # Step 1: Normalize types
         self.df["sale_amount"] = pd.to_numeric(self.df["sale_amount"], errors="coerce")
         self.df["discount_percent"] = pd.to_numeric(self.df["discount_percent"], errors="coerce")
