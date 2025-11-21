@@ -220,7 +220,7 @@ pytest --cov=src --cov-report=term-missing
 
 1. Pytest Setup and Troubleshooting
 During initial setup, pytest failed to discover and execute tests due to environment inconsistencies and import resolution issues. These were resolved through the following steps:
-✅ Fixes Applied
+Fixes Applied
 - Interpreter mismatch: Ensured the correct Python interpreter (analytics-project) was selected and activated
 - Import errors: Standardized relative imports across modules and verified __init__.py presence in test directories
 - Environment isolation: Created a dedicated virtual environment and installed dependencies via requirements.txt
@@ -259,7 +259,7 @@ Resolution Steps
 - Open notebook (.ipynb)
 - Click kernel picker → choose:
 
-## 4.1 Data Cleaning with DataScrubber
+## P3: Data Cleaning with DataScrubber
 
 This project includes a modular data cleaning pipeline using the DataScrubber class, located in
 `src/analytics_project/data_preparation/data_scrubber.py`. The DataScrubber provides reusable
@@ -302,17 +302,19 @@ Note: The `DataScrubber` class is a reusable library module that provides the co
 functionality. It is not meant to be run directly but is imported by the preparation scripts.
 
 
-## 5 ETL Design Overview
+## P3 ETL Design Overview
 
 This project implements a modular ETL pipeline to transform raw retail data into a structured SQLite data warehouse for downstream analytics. The design emphasizes schema integrity, reproducibility, and SQL join practice using mock reference tables.
 
-#### 5.1 Original Raw Schema
+## P4 Data Warehousing
+
+#### 4.1 Original Raw Schema
 
 The raw data files contained rich transactional and entity-level information. Below is a summary of the original columns before transformation:
 
 ![Excel Snapshot of Sales Table](images/original_schema.png)
 
-### 5.2 ETL Transformations
+### 4.2 ETL Transformations
 
 During the ETL process, several columns were removed or transformed to align with the simplified schema and support SQL join practice:
 
@@ -359,7 +361,7 @@ Table: campaign
   - start_date
   - end_date
 
-Query example:
+### 4.3 SQL Query example
 
   SELECT st.region, ca.campaign_name, SUM(sa.sale_amount)
   FROM sale AS sa
@@ -374,14 +376,14 @@ Query example:
   2  South-West  Phoenix Outfitters    334159.56
   3        West   Los Angeles Plaza    314082.10
 
-#### 5.3 ETL Highlights
+#### 4.5 ETL Highlights
 
 - Schema Alignment: All foreign key fields were validated and coerced to integer types (Int64) to ensure join safety.
 - Date Randomization: sale_date values were randomized across a 6-month range to simulate temporal variation.
 - Selective Column Retention: Only analytics-relevant fields were retained to simplify schema and focus on campaign/store joins.
 
 
-### 5.4 SQLite Extension Limitation in VS Code
+### 4.6 SQLite Extension Limitation in VS Code
 
 Despite reinstalling the SQLite extension in Visual Studio Code, the expected interface features — such as the "Open Database" option in right-click context menu — did not appear. This prevented direct interaction with .db files through the extension UI.
 As a workaround, all SQL operations (including schema creation, data inspection, and joins) were executed using Python scripts via sqlite3 and pandas. This approach ensured full control over database interactions and reproducibility across environments.
@@ -392,21 +394,21 @@ As a workaround, all SQL operations (including schema creation, data inspection,
 - Data validation and joins are tested using Python-based queries instead of relying on extension-based exploration
 This approach maintains full functionality and avoids reliance on potentially unstable IDE extensions.
 
-## 6 Power BI Integration, Dashboard Creation, Analysis
+## 5 Power BI Integration - Dashboard Creation and Analysis
 
-### 6.1 Connecting the Database
+### 5.1 Connecting the Database
 
 - The smart_sales.db SQLite warehouse was connected to Power BI using an ODBC driver.
 - This allowed direct access to the fact (sale) and dimension tables (store, campaign, customer, product) for analysis.
 
-### 6.2 Writing SQL in Power Query
+### 5.2 Writing SQL in Power Query
 
 - Within Power Query, custom SQL queries were written to shape the data before loading into the model.
 - Key queries included:
   - Total Sales by Company: aggregated sales across all stores.
   - Total Sales by Store: grouped sales by individual store for comparison.
 
-### 6.3 Dashboards with OLAP Techniques
+### 5.3 Dashboards with OLAP Techniques
 
 1. Using OLAP concepts (slicing, dicing, and drill-down), interactive dashboards were created:
 - Total Sales by Month: trend analysis
@@ -416,7 +418,7 @@ This approach maintains full functionality and avoids reliance on potentially un
   - Total sales by product category
   - Total sales by engagement style (Instore, Mobile, Desktop) within each store
 
-1. Dashboard and Analysis
+2. Dashboard and Analysis
 
   1. Total Sales by Month: trend analysis
   - Sales fluctuate significantly, with a peak in July and a sharp drop in September, suggesting seasonal or campaign-driven  dynamics.
@@ -439,7 +441,7 @@ This approach maintains full functionality and avoids reliance on potentially un
 ![Total Sales by Region and Campaign](images/total_sales_by_region_campaign.png)
 
 
-  1. Total sales per campaign/Total sales by engagement style (Instore, Mobile, Desktop) within each store
+  3. Total sales per campaign/Total sales by engagement style (Instore, Mobile, Desktop) within each store
   - Summer Sale emerged as the most successful campaign across all stores.
   - The Mobile channel was the most popular shopping method, followed by Desktop, confirming the growing dominance of online shopping
   - At Downtown Seattle store, New Year Kickoff led (36.3k) in sales.
@@ -450,7 +452,7 @@ This approach maintains full functionality and avoids reliance on potentially un
 
 ![Total Sales per Campaign/Total Sales by Engagement Style](images/total_sales_drill_down.png)
 
-### 6.4 Challenges
+### 5.4 Challenges
 
 - During cube building and Power BI integration, inconsistencies were discovered in the prepared datasets:
   - Some product_id values in the sale table did not exist in the product dimension.
