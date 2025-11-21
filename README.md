@@ -415,10 +415,8 @@ This approach maintains full functionality and avoids reliance on potentially un
   - Total sales per campaign
   - Total sales by engagement style (Instore, Mobile, Desktop) within each store
 
-1. Dashboards
 
-
-2. analysis for each dashboard
+1. Dashboard and Analysis
 
   1. Total Sales by Month: trend analysis
    - Seasonal Dip: There’s a noticeable drop in sales around July 2025, which could indicate a seasonal slowdown, inventory   issue
