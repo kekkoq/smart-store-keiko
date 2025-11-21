@@ -413,42 +413,40 @@ This approach maintains full functionality and avoids reliance on potentially un
 - Total Sales by Region and Campaign
 - Store Slicer: enabled filtering by store to view:
   - Total sales per campaign
+  - Total sales by product category
   - Total sales by engagement style (Instore, Mobile, Desktop) within each store
-
 
 1. Dashboard and Analysis
 
   1. Total Sales by Month: trend analysis
-   - Seasonal Dip: There’s a noticeable drop in sales around July 2025, which could indicate a seasonal slowdown, inventory   issue
-   - Strong Recovery: Sales spike sharply in October 2025, possibly due to a successful campaign, product launch, or holiday prep.
-   - Forecast Uncertainty: The forecast sales from January to March 2026 shows expected growth but with uncertainty.
-   - Average sales: $113,956; hightest sales: $135,093 - can be used as a target line for next campaign; lowest sales: $92,492 - may require to investigate the causes.
+  - Sales fluctuate significantly, with a peak in July and a sharp drop in September, suggesting seasonal or campaign-driven  dynamics.
+  - Benchmark lines (e.g., 151K, 114K, 88K) help contextualize performance thresholds — possibly representing targets, averages, or historical baselines.
+  - Average sales: $113,956; hightest sales: $135,093 - can be used as a target line for next campaign; lowest sales: $92,492 - may require to investigate the causes.
 
 ![Total Sales by Month](images/total_sales_by_month.png)
 
   2. Total Sales by Region and Campaign (New Year Kickoff, Summer Sale, Holiday Promo, Back to School)
-    Top Campaigns: Holiday Promo consistently outperforms other campaigns across all regions.
-   - East: 115K
-   - North: 121K
-   - South-West: 97K
-   - West: 92K
--
-    Regional Strengths
-  - South-West shows steady performance.
-  - North and East performed strong, with all campaigns above 72K.
+  - Top Campaigns:New Years kick off made strong performance across most regions.
+  - Summer Sale performed best in North (121K), while South-West lagged at 88K.
+  - Back to School underperformed - lowest sale (63K) in West.
+
+  Regional Strengths:
+  - North and East shows strong performance compared to West and South-West
   - West did underperformed in all campaigns.
   - Back to School campaign underperformed across all regions.
-  - By contrast, Holiday Promo and Back to School contributed relatively little across all regions, highlighting weaker engagement compared to other campaigns.
+  - Holiday Promo and Back to School contributed relatively little across all regions, highlighting weaker engagement compared to other campaigns.
 
 ![Total Sales by Region and Campaign](images/total_sales_by_region_campaign.png)
 
 
-  3. Total sales per campaign/Total sales by engagement style (Instore, Mobile, Desktop) within each store
-  - New Year kickoff emerged as the most successful campaign overall.
+  1. Total sales per campaign/Total sales by engagement style (Instore, Mobile, Desktop) within each store
+  - Summer Sale emerged as the most successful campaign across all stores.
   - The Mobile channel was the most popular shopping method, followed by Desktop, confirming the growing dominance of online shopping
-  - At the Downtown Seattle store, New Year Kickoff led 121k in sales while other campaigns ranged between $72k - $88k range.
-  - At the New York uptown, Summer Sale outperformed, reaching $115k, surpassing all other campaigns in that location.
-  - The Los Angeles Plaza and the Phoenix Outfitters showed the similar patterns with strong performance in both Summer Sale and New Year Kickoff.
+  - At Downtown Seattle store, New Year Kickoff led (36.3k) in sales.
+  - At New York uptown, Summer Sale outperformed, reaching $115k while all other campaigns underperformed.
+  - At Los Angeles Plaza, Back to School made (8.8k) sales - significantly lower than all other campaigns.
+  - Ar Phoenix Outfitters showed the similar patterns with strong performance in both Summer Sale and New Year Kickoff.
+  - Home leads by a wide margin, suggesting strong consumer demand and possibly effective bundling or seasonal promotions.
 
 ![Total Sales per Campaign/Total Sales by Engagement Style](images/total_sales_drill_down.png)
 
