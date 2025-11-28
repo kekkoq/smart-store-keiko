@@ -13,10 +13,20 @@
 
   // Use Ruff as the single formatter (if installed)
   "editor.defaultFormatter": "charliermarsh.ruff",
-  "editor.formatOnSave": true
-}
+  "editor.formatOnSave": true,
 
-{
+  // Python environment
   "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
-  "python.terminal.activateEnvironment": true
+  "python.terminal.activateEnvironment": true,
+
+  // SQLTools runtime
+  "sqltools.useNodeRuntime": true,
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "driver": "SQLite",
+      "database": "${workspaceFolder:smart-store-keiko}/data/dw/smart_sales.db",
+      "name": "Smart_Sales"
+    }
+  ]
 }

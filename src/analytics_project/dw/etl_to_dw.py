@@ -8,8 +8,7 @@ import pandas as pd
 # For local imports, temporarily add project root to sys.path
 # Note: this can be removed - our project uses a modern /src/ folder and __init__.py files
 # To make local imports easier.
-# Adjust the paths and code to fit with this updated organization.
-# Questions: Ask them here in this project discussion and we can help.
+
 PROJECT_ROOT = pathlib.Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.append(str(PROJECT_ROOT))
@@ -66,18 +65,18 @@ def create_schema(cursor: sqlite3.Cursor) -> None:
     )
     """)
 
+    cursor.execute("DROP TABLE IF EXISTS campaign")
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS campaign (
             campaign_id INTEGER PRIMARY KEY,
             campaign_name TEXT,
-            start_date TEXT,
-            end_date TEXT
+            campaign_cost REAL
         )
     """)
 
 
 def delete_existing_records(cursor: sqlite3.Cursor) -> None:
-    """Delete all existing records from the customer, product, and sale tables."""
+    """Delete all existing records from customer, product, sale, store, and campaign tables."""
     cursor.execute("DELETE FROM customer")
     cursor.execute("DELETE FROM product")
     cursor.execute("DELETE FROM sale")
@@ -115,12 +114,12 @@ def insert_mock_stores(cursor: sqlite3.Cursor) -> None:
 
 def insert_mock_campaigns(cursor: sqlite3.Cursor) -> None:
     campaigns = [
-        (0, "Summer Sale", "2025-06-01", "2025-07-31"),
-        (1, "Holiday Promo", "2025-11-01", "2025-12-31"),
-        (2, "Back to School", "2025-08-01", "2025-09-15"),
-        (3, "NeW Year Kickoff", "2025-01-01", "2025-01-31"),
+        (0, "Rewards Program", 350000.0),
+        (1, "Discount Bundle", 300000.0),
+        (2, "Premium Upsell", 350000.0),
+        (3, "Referral Incentives", 300000.0),
     ]
-    cursor.executemany("INSERT INTO campaign VALUES (?, ?, ?, ?)", campaigns)
+    cursor.executemany("INSERT INTO campaign VALUES (?, ?, ?)", campaigns)
 
 
 def load_data_to_db() -> None:
@@ -139,6 +138,51 @@ def load_data_to_db() -> None:
 
         # Load prepared data using pandas
         customers_df = pd.read_csv(PREPARED_DATA_DIR.joinpath("customers_prepared.csv"))
+
+        mask = customers_df["engagement_style"] == "Unknown"
+        customers_df.loc[mask, "engagement_style"] = np.random.choice(
+            ["Desktop", "Mobile", "InStore"], size=mask.sum()
+        )
+
+        # Insert placeholder rows for missing customer_ids
+        placeholder_customers = pd.DataFrame(
+            [
+                {
+                    "customer_id": 1000,
+                    "region": "South-West",
+                    "join_date": "2021-11-01",
+                    "loyalty_points": 719,
+                    "engagement_style": "Mobile",
+                },
+                {
+                    "customer_id": 1140,
+                    "region": "Central",
+                    "join_date": "2023-06-15",
+                    "loyalty_points": 5099,
+                    "engagement_style": "InStore",
+                },
+                {
+                    "customer_id": 1168,
+                    "region": "East",
+                    "join_date": "2024-10-31",
+                    "loyalty_points": 7138,
+                    "engagement_style": "Desktop",
+                },
+            ]
+        )
+
+        customers_df = pd.concat([customers_df, placeholder_customers], ignore_index=True)
+
+        # Align columns to match the customer table schema
+        customer_columns = [
+            "customer_id",
+            "region",
+            "join_date",
+            "loyalty_points",
+            "engagement_style",
+        ]
+        customers_df = customers_df[customer_columns]
+
         # 🔍 Check for duplicate customer IDs
         dupes = customers_df[customers_df["customer_id"].duplicated(keep=False)]
         print("Duplicate rows:\n", dupes)
@@ -146,6 +190,32 @@ def load_data_to_db() -> None:
         print("Duplicate customer_ids:", customers_df["customer_id"].duplicated().sum())
 
         products_df = pd.read_csv(PREPARED_DATA_DIR.joinpath("products_prepared.csv"))
+        # Insert placeholder rows for missing product_ids
+        placeholder_products = pd.DataFrame(
+            [
+                {
+                    "product_id": 2000,
+                    "product_name": "Electronics-Home",
+                    "category": "Electronics",
+                    "unit_price": 963.31,
+                },
+                {
+                    "product_id": 2083,
+                    "product_name": "Clothing-Cut",
+                    "category": "Home",
+                    "unit_price": 768.16,
+                },
+            ]
+        )
+
+        products_df = pd.concat([products_df, placeholder_products], ignore_index=True)
+
+        # Align columns to match the product table schema
+        product_columns = ["product_id", "product_name", "category", "unit_price"]
+        products_df = products_df[product_columns]
+
+        # Continue with sales load
+
         sales_df = pd.read_csv(PREPARED_DATA_DIR.joinpath("sales_data_prepared.csv"))
 
         # Rename TransactionID to match the database schema
@@ -172,8 +242,14 @@ def load_data_to_db() -> None:
         ]
         sales_df = sales_df[sale_columns]
 
+        # Align columns to match the product table schema
         product_columns = ["product_id", "product_name", "category", "unit_price"]
         products_df = products_df[product_columns]
+
+        # Step 2: Apply product name corrections
+        product_name_corrections = {2048: "Air Purifier"}
+        for pid, new_name in product_name_corrections.items():
+            products_df.loc[products_df['product_id'] == pid, 'product_name'] = new_name
 
         customer_columns = [
             "customer_id",

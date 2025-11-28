@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 
 # Local imports
-from .utils_logger import logger, project_root
+from analytics_project.utils.logger import init_logger, logger
 
 # Set up paths as constants
 DATA_DIR: pathlib.Path = project_root.joinpath("data")

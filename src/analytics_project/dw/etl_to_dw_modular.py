@@ -27,7 +27,7 @@ import pandas as pd
 sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent.parent))
 
 # import from local modules
-from utils.logger import logger
+from analytics_project.utils.logger import init_logger, logger
 
 # === Path Constants ===
 

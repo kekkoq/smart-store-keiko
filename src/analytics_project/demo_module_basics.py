@@ -26,7 +26,7 @@ Professional Applications:
 #####################################
 
 # Import the shared logger
-from .utils_logger import init_logger, logger
+from analytics_project.utils.logger import init_logger, logger
 
 #####################################
 # Define Functions

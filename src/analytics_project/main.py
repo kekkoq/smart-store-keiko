@@ -22,11 +22,11 @@ Professional Applications:
 """
 
 # Import from local project modules
-from .demo_module_basics import demo_basics
-from .demo_module_languages import demo_greetings
-from .demo_module_stats import demo_stats
-from .demo_module_viz import demo_viz
-from .utils_logger import init_logger, logger
+from analytics_project.demo_module_basics import demo_basics
+from analytics_project.demo_module_languages import demo_greetings
+from analytics_project.demo_module_stats import demo_stats
+from analytics_project.demo_module_viz import demo_viz
+from analytics_project.utils.logger import init_logger, logger
 
 
 def main() -> int:

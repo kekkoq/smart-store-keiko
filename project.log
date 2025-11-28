@@ -1,23 +1,11 @@
-2025-11-12 20:06:INFO    AT logger.py:104: Logging to file: C:\Repos\smart-store-keiko\project.log
-2025-11-12 20:06:INFO    AT prepare_sales_data.py:129: Starting sales data preparation process
-2025-11-12 20:06:INFO    AT prepare_sales_data.py:62: === Starting sales data cleaning ===
-2025-11-12 20:06:INFO    AT prepare_sales_data.py:66: Reading data from: %s
-2025-11-12 20:06:INFO    AT prepare_sales_data.py:68: Initial data shape: %s
-2025-11-12 20:06:INFO    AT prepare_sales_data.py:73: After standardization: %s
-2025-11-12 20:06:INFO    AT data_scrubber.py:321: Updated 266 rows: sale_amount = 0.00 → discount_percent set to 100.0
-2025-11-12 20:06:INFO    AT prepare_sales_data.py:103: Safely converted 'campaign_id' to integer format, preserving 0 as 'no campaign'
-2025-11-12 20:06:INFO    AT prepare_sales_data.py:110: Data info:
-%s
-2025-11-12 20:06:INFO    AT prepare_sales_data.py:111: Data summary:
-%s
-2025-11-12 20:06:INFO    AT prepare_sales_data.py:112: === Finished sales data cleaning ===
-2025-11-12 20:06:INFO    AT prepare_sales_data.py:133: Final column names in main(): %s
-2025-11-12 20:06:INFO    AT prepare_sales_data.py:134: Standardized columns: %s
-2025-11-12 20:06:INFO    AT prepare_sales_data.py:149: Standardized payment methods: %s
-2025-11-12 20:06:INFO    AT prepare_sales_data.py:163: Cleaned sale_amount column — min: %.2f, max: %.2f
-2025-11-12 20:06:INFO    AT prepare_sales_data.py:172: Converted %d empty strings to missing values
-2025-11-12 20:06:INFO    AT prepare_sales_data.py:184: Saved cleaned data to: %s
-2025-11-12 20:06:INFO    AT prepare_sales_data.py:187: Final data shape: %s
-2025-11-12 20:06:INFO    AT prepare_sales_data.py:189: Unique payment methods: %s
-2025-11-12 20:06:INFO    AT prepare_sales_data.py:191: Sale amount range: %.2f to %.2f
-2025-11-12 20:06:INFO    AT prepare_sales_data.py:197: Sales data preparation completed successfully
+2025-11-26 17:23:INFO    AT logger.py:104: Logging to file: C:\Repos\smart-store-keiko\project.log
+2025-11-26 17:23:INFO    AT top_three_products.py:91: THIS_DIR:            C:\Repos\smart-store-keiko\src\analytics_project\olap
+2025-11-26 17:23:INFO    AT top_three_products.py:92: PACKAGE_DIR:         C:\Repos\smart-store-keiko\src\analytics_project
+2025-11-26 17:23:INFO    AT top_three_products.py:93: SRC_DIR:             C:\Repos\smart-store-keiko\src
+2025-11-26 17:23:INFO    AT top_three_products.py:94: PROJECT_ROOT_DIR:    C:\Repos\smart-store-keiko
+2025-11-26 17:23:INFO    AT top_three_products.py:95: DATA_DIR:            C:\Repos\smart-store-keiko\data
+2025-11-26 17:23:INFO    AT top_three_products.py:96: WAREHOUSE_DIR:       C:\Repos\smart-store-keiko\data\dw
+2025-11-26 17:23:INFO    AT top_three_products.py:97: DB_PATH:             C:\Repos\smart-store-keiko\data\dw\smart_sales.db
+2025-11-26 17:23:INFO    AT top_three_products.py:98: OLAP_OUTPUT_DIR:     C:\Repos\smart-store-keiko\data\olap_cubing_outputs
+2025-11-26 17:23:INFO    AT top_three_products.py:99: RESULTS_OUTPUT_DIR:  C:\Repos\smart-store-keiko\data\results
+2025-11-26 17:23:INFO    AT top_three_products.py:116: Sales + store + product data successfully loaded from SQLite DW.

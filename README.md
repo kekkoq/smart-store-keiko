@@ -24,9 +24,6 @@ It introduces reproducible environment management using uv, ensuring consistency
 
 ## WORKFLOW 1. Set Up Your Machine
 
-Proper setup is critical.
-Complete each step in the following guide and verify carefully.
-
 - [SET UP MACHINE](./SET_UP_MACHINE.md)
 
 ---
@@ -121,8 +118,7 @@ To execute the data preparation module with relative imports, run the script as 
 python -m src.analytics_project.data_prep
 
 This tells Python to treat the folder as a package, enabling relative imports like:
-from .utils_logger import init_logger
-
+from analytics_project.utils.logger import init_logger
 
 Tip: Avoid running the script directly like this:
 python src/analytics_project/data_prep.py
@@ -216,7 +212,26 @@ uv pip install -r requirements.txt
 $env:PYTHONPATH = "$PWD/src"
 pytest --cov=src --cov-report=term-missing
 
-### 3.8 Challenges
+### 3.8 Logger Path Mapping
+Project Tree:
+
+![Project Path Setup](path_setup.png)
+
+How the Import Works
+- logger module lives in:
+src/analytics_project/utils/logger.py
+- Because analytics_project is a Python package (thanks to __init__.py), I import it like this:
+from analytics_project.utils.logger import init_logger, logger, project_root
+- This path means:
+- analytics_project → my main package under src/
+- utils → the subpackage containing utility functions
+- logger → the actual file (logger.py) that defines init_logger, logger, and project_root
+Why This Mapping Is Correct
+- Separation of concerns: utils/logger.py is reusable across all modules (etl_to_dw.py, cubing.py, etc.).
+- Consistency: All scripts import from the same path (analytics_project.utils.logger), so you don’t have conflicting imports like utils_logger.
+- Flexibility: If you add more utilities later (e.g., validators.py, scrubbers.py), they’ll live alongside logger.py in the utils/ folder.
+
+### 3.9 Setup Challenges
 
 1. Pytest Setup and Troubleshooting
 During initial setup, pytest failed to discover and execute tests due to environment inconsistencies and import resolution issues. These were resolved through the following steps:
@@ -301,15 +316,34 @@ The cleaned datasets will be saved as:
 Note: The `DataScrubber` class is a reusable library module that provides the core cleaning
 functionality. It is not meant to be run directly but is imported by the preparation scripts.
 
+### 3.1 Data Scrubbing Utilities
 
-## P3 ETL Design Overview
+This project includes a set of reusable scrubbing methods for cleaning and standardizing datasets before analysis. These methods handle common issues such as inconsistent column names, duplicates, missing values, outliers, invalid dates, and more.
+
+See below for available methods:
+
+Method → Purpose
+- standardize_column_names → Converts camelCase or spaced column names into snake_case.
+- standardize_categorical_column → Strips whitespace and applies title‑case to categorical values (e.g., "east" → "East").
+- remove_duplicate_records → Removes duplicate rows; optionally checks duplicates only on specified columns.
+- handle_missing_data → Handles missing values by dropping rows or filling with a specified value.
+- format_column_strings → Trims whitespace and enforces casing (lower or upper) in a given column.
+- rename_columns → Renames columns using a provided dictionary of old → new names.
+- reorder_columns → Reorders DataFrame columns based on a specified list.
+- filter_outliers → Removes rows where values fall outside numeric bounds.
+- convert_column_type → Converts a column to a specified data type (e.g., int, float, str).
+- parse_date_column → Parses a column as datetime and stores the result in a new column.
+- remove_negative_values → Removes rows where the specified column contains negative values.
+- convert_empty_strings_to_na → Converts empty strings into missing values (NaN).
+- override_invalid_dates → Replaces invalid or missing dates with a fixed default date.
+
+## P4 ETL Design Overview
 
 This project implements a modular ETL pipeline to transform raw retail data into a structured SQLite data warehouse for downstream analytics. The design emphasizes schema integrity, reproducibility, and SQL join practice using mock reference tables.
 
-## P4 Data Warehousing
+### 4.1 Data Warehousing
 
-#### 4.1 Original Raw Schema
-
+Original Raw Schema
 The raw data files contained rich transactional and entity-level information. Below is a summary of the original columns before transformation:
 
 ![Excel Snapshot of Sales Table](images/original_schema.png)
@@ -363,18 +397,38 @@ Table: campaign
 
 ### 4.3 SQL Query example
 
-  SELECT st.region, ca.campaign_name, SUM(sa.sale_amount)
-  FROM sale AS sa
-  JOIN store AS st ON sa.store_id = st.store_id
-  JOIN campaign AS ca ON sa.campaign_id = ca.campaign_id
-  GROUP BY st.region, ca.campaign_name;
+In a py file:
 
-  Output:
-        region          store_name    total_sales
-  0        East     New York Uptown    365219.19
-  1       North    Downtown Seattle    354006.48
-  2  South-West  Phoenix Outfitters    334159.56
-  3        West   Los Angeles Plaza    314082.10
+  import sqlite3
+  import pandas as pd
+
+  # Connect to the database
+  conn = sqlite3.connect("data/dw/smart_sales.db")
+
+  # SQL query
+  query = """
+
+  SELECT
+      st.region,
+      st.store_name,
+      SUM(sa.sale_amount) AS total_sales
+  FROM
+      sale AS sa
+  JOIN
+      store AS st
+      ON sa.store_id = st.store_id
+  GROUP BY
+      st.region, st.store_id
+  ORDER BY
+      st.region, total_sales DESC
+  """
+
+  # Run the query and load into a DataFrame
+  df = pd.read_sql_query(query, conn)
+
+  print(df)
+
+![Total Sales by Region/Store](images/total_sales_by_region_store_sql.png)
 
 #### 4.5 ETL Highlights
 
@@ -394,7 +448,7 @@ As a workaround, all SQL operations (including schema creation, data inspection,
 - Data validation and joins are tested using Python-based queries instead of relying on extension-based exploration
 This approach maintains full functionality and avoids reliance on potentially unstable IDE extensions.
 
-## 5 Power BI Integration - Dashboard Creation and Analysis
+## P5 Power BI Integration - Dashboard Creation and Analysis
 
 ### 5.1 Connecting the Database
 
@@ -411,12 +465,9 @@ This approach maintains full functionality and avoids reliance on potentially un
 ### 5.3 Dashboards with OLAP Techniques
 
 1. Using OLAP concepts (slicing, dicing, and drill-down), interactive dashboards were created:
-- Total Sales by Month: trend analysis
-- Total Sales by Region and Campaign
-- Store Slicer: enabled filtering by store to view:
-  - Total sales per campaign
-  - Total sales by product category
-  - Total sales by engagement style (Instore, Mobile, Desktop) within each store
+  1. Total Sales by Month: trend analysis
+  2. Total Sales by Customer Region and Campaign
+  3. Top 5 Best-Selling Products by Year, Quarter, Month (Drill-Down)
 
 2. Dashboard and Analysis
 
@@ -427,38 +478,211 @@ This approach maintains full functionality and avoids reliance on potentially un
 
 ![Total Sales by Month](images/total_sales_by_month.png)
 
-  2. Total Sales by Region and Campaign (New Year Kickoff, Summer Sale, Holiday Promo, Back to School)
-  - Top Campaigns:New Years kick off made strong performance across most regions.
-  - Summer Sale performed best in North (121K), while South-West lagged at 88K.
-  - Back to School underperformed - lowest sale (63K) in West.
+  2. Total Sales by Customer Region and Campaign (Discount Bundle, Premium Upsell, Referral Incentives, Rewards Program)
 
-  Regional Strengths:
-  - North and East shows strong performance compared to West and South-West
-  - West did underperformed in all campaigns.
-  - Back to School campaign underperformed across all regions.
-  - Holiday Promo and Back to School contributed relatively little across all regions, highlighting weaker engagement compared to other campaigns.
+   High-Level Insights:
+   - Top-Performing Region:
+   East leads across all campaigns, with sales ranging from 104K to 136K, indicating strong market penetration and campaign effectiveness.
+   - Lowest-Performing Region:
+   Central consistently shows the lowest sales across all campaigns (28K–44K), suggesting limited reach or lower campaign resonance.
+   - Most Effective Campaign Overall:
+   Referral Incentives performs best in the East (136K), and is consistently strong across regions, making it a high-impact strategy.
 
-![Total Sales by Region and Campaign](images/total_sales_by_region_campaign.png)
+   Campaign Performance:
+   - Referral Incentives is the most consistent top performer across lower-performing regions (North, West, South-West, South), suggesting it's a reliable baseline strategy.
+   - Rewards Program excels in high-performing regions (East), but underperforms in South-West — possibly due to regional income or product-market fit.
+   - Discount Bundle and Premium Upsell show moderate performance, with Discount Bundle outperforming Premium Upsell across most regions
 
+3. Sales Performance by Campaign, Product, and Channel (Region-Filtered View)
 
-  3. Total sales per campaign/Total sales by engagement style (Instore, Mobile, Desktop) within each store
-  - Summer Sale emerged as the most successful campaign across all stores.
-  - The Mobile channel was the most popular shopping method, followed by Desktop, confirming the growing dominance of online shopping
-  - At Downtown Seattle store, New Year Kickoff led (36.3k) in sales.
-  - At New York uptown, Summer Sale outperformed, reaching $115k while all other campaigns underperformed.
-  - At Los Angeles Plaza, Back to School made (8.8k) sales - significantly lower than all other campaigns.
-  - Ar Phoenix Outfitters showed the similar patterns with strong performance in both Summer Sale and New Year Kickoff.
-  - Home leads by a wide margin, suggesting strong consumer demand and possibly effective bundling or seasonal promotions.
+  Product Sales:
+  - Home products lead with 0.40M in sales, significantly outperforming all other categories.
+   - Highest sales in East region (151k)
+   - Indicates strong regional demand or effective campaign targeting for home-related items.
+   - May justify prioritizing inventory and promotions in this category.
+   - Clothing and electronics show notably lower sales in West and South-West.
+   - May reflect regional preferences, pricing sensitivity, or weaker campaign resonance.
+   - Suggests need for localized marketing strategies or product mix adjustments in those regions.
 
-![Total Sales per Campaign/Total Sales by Engagement Style](images/total_sales_drill_down.png)
+  Channel Performance:
+  - Mobile and desktop channels are increasingly popular, reflecting a broader shift from traditional in-store shopping to online engagement.
+  -Central Region Exception: In-Store Still Dominant
+   - In the Central region, in-store sales lead at 72K, outperforming mobile (55K) and desktop (12K).
+
+![Sales Performance by Campaign, Product, and Channel](images/sales_performance_campaign_product_channel.png)
 
 ### 5.4 Challenges
 
 - During cube building and Power BI integration, inconsistencies were discovered in the prepared datasets:
   - Some product_id values in the sale table did not exist in the product dimension.
   - Some customer_id values in the sale table did not exist in the customer dimension.
-- When merged, these mismatches resulted in Unknown/Undefined values in the cube and dashboards.
+  - When merged, these mismatches resulted in Unknown/Undefined values in the cube and dashboards.
+  - To resolve this, corrective logic was implemented in the ETL pipeline script (etl-to-dw.py) to ensure data integrity prior to Power BI loading.
 - This highlighted the importance of data validation and integrity checks during ETL and before OLAP cubing.
+
+## P6 BI Insights and Storytelling
+
+### OLAP Project Workflow
+
+Section 1. The Business Goal
+
+  Question:
+  How effective is each sales campaign in delivering positive ROI?
+
+  Why It Matters:
+  - Identify which campaigns drive the most value.
+  - Ensures marketing spend is justified with measurable sales outcomes.
+  - Helps identify underperforming campaigns for reevaluation.
+  - Creates benchmarks for designing future campaigns.
+  - Supports better segmentation and resource allocation.
+  - Align marketing strategy with inventory and supply chain planning.
+  - Strengthens collaboration between marketing, finance, and operations for overall business growth goals.
+
+Section 2. Data Source
+
+  - Starting Point:
+  A Database file (smart_sales.db) was populated through the ETL pipeline to ensure data is cleaned, transformed, and structured for analysis.
+  - Storage:
+  Data was connected to a SQLite database for querying and integration with Power BI.
+  - Columns Used in Cubing Script
+    - Campaign: campaign_name, campaign_cost
+    - Sale: sale_amount, sale_date
+    - Customer: region
+    - To merge dimension tables into sale table:
+      - product_id, customer_id
+
+Section 3. Tools
+
+  I chose Python to create a cube, then the script was visualized in Power BI to support slicing, dicing and drill-down.
+
+  Python scripts:
+  1. cubing_campaign.py to perform drill-down in Power BI
+  2. cubing_campaign_sql.py to validate the metrics used in Power BI
+  3. top_three_products.py to perform dicing in Python-based visualization
+
+  - This pre-computed file reduces complexity in DAX and supports efficient slicing and benchmarking in Power BI without overloading the model.
+  - Python scripts provide reproducibility, modularity, and flexibility for both exploratory analysis and dashboard-ready outputs.
+
+Section 4. Workflow & Logic - cubing_campaign.py
+
+  Filing Structure:
+
+  ![Mapping Tree](images/path_setup.png)
+
+  1. Ingest Data
+     - Connects to the SQLite data warehouse.
+     - Loads sales plus dimension tables (store, campaign, product, customer).
+     - Merges them into one enriched sales_df with all attributes attached.
+
+  2. Prepare Dimensions & Metrics
+     - Adds Year and Month columns from sale_date.
+     - Defines dimensions (Year, Month, region, campaign_name, category).
+     - Defines metrics (sale_amount: sum, sale_id: count, campaign_cost: first).
+  -
+  3. Create OLAP Cube
+     - Groups data by dimensions.
+     - Aggregates metrics into a cube.
+     - Calculates ROI measures:
+       - Monthly ROI = (sales – monthly cost) ÷ monthly cost.
+       - Cumulative ROI = (cumulative sales – campaign cost) ÷ campaign cost.
+       - Overall ROI = (sales – campaign cost) ÷ campaign cost.
+       - Adds cumulative sales tracking per campaign.
+       -
+  4. Export Results
+     - Writes the OLAP cube to campaign_effectiveness.csv.
+
+Section 5. Results
+
+   Cumulative ROI Analysis (2025)
+
+     1. Referral Incentives: Strongest ROI Performance (35.62%)
+     - Starts negative but crosses into positive ROI by Month 9, ending at +35.6%.
+     - Consistently high monthly sales (e.g., 48K in Month 2, 42K in Month 8).
+     - Most efficient use of campaign cost ($300K), with highest cumulative sales (406K).
+     - Indicates strong customer response and sustained momentum.
+
+     1. Rewards Program:  ROI (5.9%)
+     - Monthly sales fluctuate but peak in Month 12 (41K).
+     - Suggests potential for long-term payoff.
+
+     1. Discount Bundle: Breaks Even at Year-End (0.76%)
+     - ROI turns positive only in Month 12
+     - Monthly sales are moderate, with a peak in Month 7 (33K).
+     - Cumulative sales: 302K, lowest among all campaigns.
+     - Indicates limited efficiency — may need redesign or targeting adjustment.
+
+     1. Premium Upsell: ROI (-17.8%)
+     - ROI remains negative throughout 2025.
+     - Despite decent cumulative sales (287K), campaign cost is higher ($350K).
+     - Monthly sales are inconsistent, with a spike in Month 10 (38K) but weak throughout the year.
+     - likely needs reevaluation or repositioning.
+
+![Cumulative ROI](images/roi.png)
+
+  Top 3 Best-Selling Products by units per store (Python visualization only)
+
+  Store-Level Insights:
+    1. Downtown Seattle
+      - Top Product: Women’s skirt, Men’s Jacket, Air Purifier.
+      - Prioritize inventory for apparel. consider bundling women's clothing with accessories.
+
+    2. Los Angeles Plaza
+      - Top Products: Tuxedo Suit, Small Sofa, Gas Range.
+      - Optimize layout to showcase both fashion and home sections.
+
+    3. New York Uptown
+      - Top Products: Wedding Dress, Earbuds, Blender.
+      - Strengthen segmenting by category
+
+    4. Phoenix Outfitters
+      - Top Products: Desktop Computer, Air Fryer, Lawn Mower.
+      - Consider seasonal campaigns (e.g., spring gardening, holiday tech deals).
+
+![Top 3 Best-Selling Products by Units per Store](images/top_three_products_per_store.png)
+
+  Top 5 Best-Selling Products in sales amount by Year, Quarter, Month (Drill-Down)
+
+  Key Insights:
+   - iPhone Leads with 36.4K units sold in 2025. The iPhone is the clear top seller.
+     - Indicates strong launch or renewal cycles early.
+     - Its margin over the second-place Dyson Vacuum (3.2K units) suggests strong brand loyalty and seasonal demand.
+   - Dyson Vacuum - after a modest Q1 and Q2, peaking at 11K in Q4.
+     - This pattern may reflect holiday season demand.
+   - Roomba sales ranged from 7.6k to 10.2k from Q1 to Q3 and dropped sharply to 4.5k in Q4.
+     - This warrants investigation into potential inventory constraints or supply chain issues.
+   - Premium Chair’s with 15K units sold, Q2 was its strongest quarter — nearly double its Q1 and Q3 performance.
+     - Suggests possibly tied to home office upgrades or summer sales.
+   - Standing Desk shows steady sales in Q1 to Q4, underperforming in Q2 and Q3.
+     - This may be liked to consumer's priority shift or inventory lag.
+
+
+![Top 5 Best-Selling Products by Year, Quarter, Month](images/top_five_products.png)
+
+
+Section 6: Suggested Business Action
+
+  1. Referral Incentives:
+     - Expand this campaign into new customer demographics since it shows strong performance.
+  2. Rewards Program:
+     - Conduct a survey or focus group to understand what drives fluctuations especially (18K) in February and (41k) in December.
+  3. Discount Bundle:
+     - Redesign discount structure and promote high-demand products.
+  4. Premium Upsell:
+     - Investigate persistent underperformance
+     - Review cost structure - marketing spend is too high?
+     - Run customer surveys to obtain customer insights on this campaign.
+
+Section 7. Challenges
+
+Challenges for This Project
+
+  - Despite earlier remediation efforts, the dataset still contained invalid and missing values.
+  - To facilitate the analysis, I replaced several nonsensical product names with recognizable items (e.g., Dyson Vacuum, iPhone).
+  - The Python campaign cubing script turned out to be incomplete. While building a visualization in Power BI, I discovered missing components that limited its ability to fully support the analysis. This required DAX Calculations in Power BI.
+  - These measures allowed me to perform detail analysis such as campaign ROI variance and monthly sales comparisons.
+
+
+
 
 
 
