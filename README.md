@@ -276,6 +276,8 @@ Resolution Steps
 
 ## P3: Data Cleaning with DataScrubber
 
+### 3.2 Data Scrubber Workflow
+
 This project includes a modular data cleaning pipeline using the DataScrubber class, located in
 `src/analytics_project/data_preparation/data_scrubber.py`. The DataScrubber provides reusable
 cleaning operations that are used by specialized preparation scripts for each data type.
@@ -316,7 +318,7 @@ The cleaned datasets will be saved as:
 Note: The `DataScrubber` class is a reusable library module that provides the core cleaning
 functionality. It is not meant to be run directly but is imported by the preparation scripts.
 
-### 3.1 Data Scrubbing Utilities
+### 3.2 Data Scrubbing Utilities
 
 This project includes a set of reusable scrubbing methods for cleaning and standardizing datasets before analysis. These methods handle common issues such as inconsistent column names, duplicates, missing values, outliers, invalid dates, and more.
 
@@ -361,6 +363,18 @@ During the ETL process, several columns were removed or transformed to align wit
 
 These tables were populated at the execution of the ETL process.
 
+  Table: sale
+  - sale_id
+  - customer_id
+  - product_id
+  - store_id
+  - campaign_id
+  - sale_amount
+  - sale_date
+  - discount_percent
+
+![Sales Table in SQLite](images/sale_table_sql.png)
+
 Table: customer
   - customer_id
   - region
@@ -373,16 +387,6 @@ Table: product
   - product_name
   - category
   - unit_price
-
-Table: sale
-  - sale_id
-  - customer_id
-  - product_id
-  - store_id
-  - campaign_id
-  - sale_amount
-  - sale_date
-  - discount_percent
 
 Table: store
   - store_id
@@ -407,7 +411,6 @@ In a py file:
 
   # SQL query
   query = """
-
   SELECT
       st.region,
       st.store_name,
@@ -425,7 +428,6 @@ In a py file:
 
   # Run the query and load into a DataFrame
   df = pd.read_sql_query(query, conn)
-
   print(df)
 
 ![Total Sales by Region/Store](images/total_sales_by_region_store_sql.png)
@@ -436,13 +438,12 @@ In a py file:
 - Date Randomization: sale_date values were randomized across a 6-month range to simulate temporal variation.
 - Selective Column Retention: Only analytics-relevant fields were retained to simplify schema and focus on campaign/store joins.
 
-
 ### 4.6 SQLite Extension Limitation in VS Code
 
 Despite reinstalling the SQLite extension in Visual Studio Code, the expected interface features — such as the "Open Database" option in right-click context menu — did not appear. This prevented direct interaction with .db files through the extension UI.
 As a workaround, all SQL operations (including schema creation, data inspection, and joins) were executed using Python scripts via sqlite3 and pandas. This approach ensured full control over database interactions and reproducibility across environments.
 
- Workaround Strategy
+ Workaround Strategy:
 - SQL queries are embedded in Python scripts using cursor.execute() or pd.read_sql_query()
   - SQL Scripts are written in /dw_create/smart_sales_analysis.py.
 - Data validation and joins are tested using Python-based queries instead of relying on extension-based exploration
@@ -548,8 +549,7 @@ Section 2. Data Source
     - Campaign: campaign_name, campaign_cost
     - Sale: sale_amount, sale_date
     - Customer: region
-    - To merge dimension tables into sale table:
-      - product_id, customer_id
+    - To merge dimension tables into sale table: product_id, customer_id
 
 Section 3. Tools
 
@@ -578,7 +578,7 @@ Section 4. Workflow & Logic - cubing_campaign.py
      - Adds Year and Month columns from sale_date.
      - Defines dimensions (Year, Month, region, campaign_name, category).
      - Defines metrics (sale_amount: sum, sale_id: count, campaign_cost: first).
-  -
+
   3. Create OLAP Cube
      - Groups data by dimensions.
      - Aggregates metrics into a cube.
@@ -601,17 +601,17 @@ Section 5. Results
      - Most efficient use of campaign cost ($300K), with highest cumulative sales (406K).
      - Indicates strong customer response and sustained momentum.
 
-     1. Rewards Program:  ROI (5.9%)
+     2. Rewards Program:  ROI (5.9%)
      - Monthly sales fluctuate but peak in Month 12 (41K).
      - Suggests potential for long-term payoff.
 
-     1. Discount Bundle: Breaks Even at Year-End (0.76%)
+     3. Discount Bundle: Breaks Even at Year-End (0.76%)
      - ROI turns positive only in Month 12
      - Monthly sales are moderate, with a peak in Month 7 (33K).
      - Cumulative sales: 302K, lowest among all campaigns.
      - Indicates limited efficiency — may need redesign or targeting adjustment.
 
-     1. Premium Upsell: ROI (-17.8%)
+     4. Premium Upsell: ROI (-17.8%)
      - ROI remains negative throughout 2025.
      - Despite decent cumulative sales (287K), campaign cost is higher ($350K).
      - Monthly sales are inconsistent, with a spike in Month 10 (38K) but weak throughout the year.
@@ -622,19 +622,20 @@ Section 5. Results
   Top 3 Best-Selling Products by units per store (Python visualization only)
 
   Store-Level Insights:
-    1. Downtown Seattle
+
+    1. Downtown Seattle:
       - Top Product: Women’s skirt, Men’s Jacket, Air Purifier.
       - Prioritize inventory for apparel. consider bundling women's clothing with accessories.
 
-    2. Los Angeles Plaza
+    2. Los Angeles Plaza:
       - Top Products: Tuxedo Suit, Small Sofa, Gas Range.
       - Optimize layout to showcase both fashion and home sections.
 
-    3. New York Uptown
+    3. New York Uptown:
       - Top Products: Wedding Dress, Earbuds, Blender.
       - Strengthen segmenting by category
 
-    4. Phoenix Outfitters
+    4. Phoenix Outfitters:
       - Top Products: Desktop Computer, Air Fryer, Lawn Mower.
       - Consider seasonal campaigns (e.g., spring gardening, holiday tech deals).
 
