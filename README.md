@@ -401,8 +401,7 @@ Table: campaign
 
 ### 4.3 SQL Query example
 
-In a py file:
-
+  In a py file:
   import sqlite3
   import pandas as pd
 
@@ -593,29 +592,29 @@ Section 4. Workflow & Logic - cubing_campaign.py
 
 Section 5. Results
 
-   Cumulative ROI Analysis (2025)
+  Cumulative ROI Analysis (2025)
 
-     1. Referral Incentives: Strongest ROI Performance (35.62%)
-     - Starts negative but crosses into positive ROI by Month 9, ending at +35.6%.
-     - Consistently high monthly sales (e.g., 48K in Month 2, 42K in Month 8).
-     - Most efficient use of campaign cost ($300K), with highest cumulative sales (406K).
-     - Indicates strong customer response and sustained momentum.
+  Referral Incentives: Strongest ROI Performance (35.62%)
+   - Starts negative but crosses into positive ROI by Month 9, ending at +35.6%.
+   - Consistently high monthly sales (e.g., 48K in Month 2, 42K in Month 8).
+   - Most efficient use of campaign cost ($300K), with highest cumulative sales (406K).
+   - Indicates strong customer response and sustained momentum.
 
-     2. Rewards Program:  ROI (5.9%)
-     - Monthly sales fluctuate but peak in Month 12 (41K).
-     - Suggests potential for long-term payoff.
+  Rewards Program:  ROI (5.9%)
+   - Monthly sales fluctuate but peak in Month 12 (41K).
+   - Suggests potential for long-term payoff.
 
-     3. Discount Bundle: Breaks Even at Year-End (0.76%)
-     - ROI turns positive only in Month 12
-     - Monthly sales are moderate, with a peak in Month 7 (33K).
-     - Cumulative sales: 302K, lowest among all campaigns.
-     - Indicates limited efficiency — may need redesign or targeting adjustment.
+  Discount Bundle: Breaks Even at Year-End (0.76%)
+   - ROI turns positive only in Month 12
+   - Monthly sales are moderate, with a peak in Month 7 (33K).
+   - Cumulative sales: 302K, lowest among all campaigns.
+   - Indicates limited efficiency — may need redesign or targeting adjustment.
 
-     4. Premium Upsell: ROI (-17.8%)
-     - ROI remains negative throughout 2025.
-     - Despite decent cumulative sales (287K), campaign cost is higher ($350K).
-     - Monthly sales are inconsistent, with a spike in Month 10 (38K) but weak throughout the year.
-     - likely needs reevaluation or repositioning.
+  Premium Upsell: ROI (-17.8%)
+   - ROI remains negative throughout 2025.
+   - Despite decent cumulative sales (287K), campaign cost is higher ($350K).
+   - Monthly sales are inconsistent, with a spike in Month 10 (38K) but weak throughout the year.
+   - likely needs reevaluation or repositioning.
 
 ![Cumulative ROI](images/roi.png)
 
@@ -623,21 +622,21 @@ Section 5. Results
 
   Store-Level Insights:
 
-    1. Downtown Seattle:
-      - Top Product: Women’s skirt, Men’s Jacket, Air Purifier.
-      - Prioritize inventory for apparel. consider bundling women's clothing with accessories.
+  Downtown Seattle:
+  - Top Product: Women’s skirt, Men’s Jacket, Air Purifier.
+  - Prioritize inventory for apparel. consider bundling women's clothing with accessories.
 
-    2. Los Angeles Plaza:
-      - Top Products: Tuxedo Suit, Small Sofa, Gas Range.
-      - Optimize layout to showcase both fashion and home sections.
+  Los Angeles Plaza:
+  - Top Products: Tuxedo Suit, Small Sofa, Gas Range.
+  - Optimize layout to showcase both fashion and home sections.
 
-    3. New York Uptown:
-      - Top Products: Wedding Dress, Earbuds, Blender.
-      - Strengthen segmenting by category
+  New York Uptown:
+  - Top Products: Wedding Dress, Earbuds, Blender.
+  - Strengthen segmenting by category.
 
-    4. Phoenix Outfitters:
-      - Top Products: Desktop Computer, Air Fryer, Lawn Mower.
-      - Consider seasonal campaigns (e.g., spring gardening, holiday tech deals).
+  Phoenix Outfitters:
+  - Top Products: Desktop Computer, Air Fryer, Lawn Mower.
+  - Consider seasonal campaigns (e.g., spring gardening, holiday tech deals).
 
 ![Top 3 Best-Selling Products by Units per Store](images/top_three_products_per_store.png)
 
@@ -656,9 +655,7 @@ Section 5. Results
    - Standing Desk shows steady sales in Q1 to Q4, underperforming in Q2 and Q3.
      - This may be liked to consumer's priority shift or inventory lag.
 
-
 ![Top 5 Best-Selling Products by Year, Quarter, Month](images/top_five_products.png)
-
 
 Section 6: Suggested Business Action
 
