@@ -12,10 +12,9 @@ GOAL:
 ACTION: This can help inform decisions about reducing operating hours
 or focusing marketing efforts on less profitable days.
 
-
-
 """
 
+import numpy as np
 import sqlite3
 import pathlib
 import pandas as pd
@@ -101,6 +100,11 @@ def generate_column_names(
     return column_names
 
 
+def clean_column_names(cols: list[str]) -> list[str]:
+    """Clean up technical suffixes from column names."""
+    return [col.replace("_sum", "").replace("_first", "").replace("_count", "") for col in cols]
+
+
 def create_olap_cube(sales_df: pd.DataFrame, dimensions: list[str], metrics: dict) -> pd.DataFrame:
     try:
         # Ensure numeric types
@@ -118,12 +122,7 @@ def create_olap_cube(sales_df: pd.DataFrame, dimensions: list[str], metrics: dic
         explicit_columns = generate_column_names(dimensions, metrics, include_sale_ids)
         cube.columns = explicit_columns
 
-        rename_map = {
-            "campaign_cost_first": "campaign_cost",
-            "sale_amount_sum": "sale_amount",
-            "sale_id_sum": "sale_count",
-        }
-        cube.rename(columns=rename_map, inplace=True)
+        cube.columns = clean_column_names(explicit_columns)
 
         # ROI metrics
         if "sale_amount" in cube.columns and "campaign_cost" in cube.columns:
@@ -141,8 +140,66 @@ def create_olap_cube(sales_df: pd.DataFrame, dimensions: list[str], metrics: dic
                 "campaign_cost"
             ].replace(0, pd.NA)
 
+        # Total ROI across all campaigns
+        total_sales = cube["sale_amount"].sum()
+        # Use max cost per campaign to avoid double-counting
+        total_cost = cube.groupby("campaign_name")["campaign_cost"].max().sum()
+        total_roi = (total_sales - total_cost) / total_cost if total_cost != 0 else np.nan
+
+        logger.info(f"Total ROI across all campaigns: {total_roi:.2%}")
+
+        # Add total row to cube
+        total_row = pd.DataFrame(
+            [
+                {
+                    "Year": np.nan,
+                    "Month": np.nan,
+                    "region": "All Regions",
+                    "campaign_name": "Total",
+                    "category": "All Categories",
+                    "sale_amount": total_sales,
+                    "campaign_cost": total_cost,
+                    "roi": total_roi,
+                    "sale_count": cube["sale_count"].sum()
+                    if "sale_count" in cube.columns
+                    else np.nan,
+                    # Add other columns as needed or fill with np.nan
+                }
+            ]
+        )
+
+        cube = pd.concat([cube, total_row], ignore_index=True)
+
+        category_summary = (
+            cube[cube["category"] != "All Categories"]
+            .groupby("category", dropna=False)[["sale_amount", "campaign_cost"]]
+            .sum()
+        )
+
+        # campaign group summaries by category
+        category_summary["roi"] = (
+            category_summary["sale_amount"] - category_summary["campaign_cost"]
+        ) / category_summary["campaign_cost"].replace(0, pd.NA)
+
+        logger.info("Category-level ROI summary:")
+        logger.info(category_summary.round(2).to_dict())
         logger.info(f"Cube columns after rename: {cube.columns.tolist()}")
         logger.info(f"OLAP cube created with dimensions: {dimensions}")
+
+        # Explicitly cast numeric columns
+        numeric_cols = [
+            "sale_amount",
+            "campaign_cost",
+            "roi",
+            "roi_monthly",
+            "roi_cumulative",
+            "cumulative_sales",
+            "sale_count",
+        ]
+        for col in numeric_cols:
+            if col in cube.columns:
+                cube[col] = pd.to_numeric(cube[col], errors="coerce")
+
         return cube
 
     except Exception as e:
@@ -178,13 +235,14 @@ def main():
     sales_df["Year"] = sales_df["sale_date"].dt.year
     sales_df["Month"] = sales_df["sale_date"].dt.month
 
-    # Replace store_name with region
-    dimensions = ["Year", "Month", "region", "campaign_name", "category"]
+    #  Define dimensions and metrics for the OLAP cube
+    dimensions = ["Year", "Month", "region", "campaign_name", "category", "store_name"]
     metrics = {"sale_amount": "sum", "sale_id": "count", "campaign_cost": "first"}
 
     olap_cube = create_olap_cube(sales_df, dimensions, metrics)
-    write_cube_to_csv(olap_cube, CUBED_FILE)
 
+    write_cube_to_csv(olap_cube, CUBED_FILE)
+    print(olap_cube.dtypes)
     logger.info("OLAP Cubing process completed successfully.")
     logger.info(f"Please see outputs in {OLAP_OUTPUT_DIR}")
     logger.info(f"Expected output: {CUBED_FILE}")

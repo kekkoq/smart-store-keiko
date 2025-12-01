@@ -1,11 +1,26 @@
-2025-11-26 17:23:INFO    AT logger.py:104: Logging to file: C:\Repos\smart-store-keiko\project.log
-2025-11-26 17:23:INFO    AT top_three_products.py:91: THIS_DIR:            C:\Repos\smart-store-keiko\src\analytics_project\olap
-2025-11-26 17:23:INFO    AT top_three_products.py:92: PACKAGE_DIR:         C:\Repos\smart-store-keiko\src\analytics_project
-2025-11-26 17:23:INFO    AT top_three_products.py:93: SRC_DIR:             C:\Repos\smart-store-keiko\src
-2025-11-26 17:23:INFO    AT top_three_products.py:94: PROJECT_ROOT_DIR:    C:\Repos\smart-store-keiko
-2025-11-26 17:23:INFO    AT top_three_products.py:95: DATA_DIR:            C:\Repos\smart-store-keiko\data
-2025-11-26 17:23:INFO    AT top_three_products.py:96: WAREHOUSE_DIR:       C:\Repos\smart-store-keiko\data\dw
-2025-11-26 17:23:INFO    AT top_three_products.py:97: DB_PATH:             C:\Repos\smart-store-keiko\data\dw\smart_sales.db
-2025-11-26 17:23:INFO    AT top_three_products.py:98: OLAP_OUTPUT_DIR:     C:\Repos\smart-store-keiko\data\olap_cubing_outputs
-2025-11-26 17:23:INFO    AT top_three_products.py:99: RESULTS_OUTPUT_DIR:  C:\Repos\smart-store-keiko\data\results
-2025-11-26 17:23:INFO    AT top_three_products.py:116: Sales + store + product data successfully loaded from SQLite DW.
+2025-11-29 15:45:INFO    AT logger.py:104: Logging to file: C:\Repos\smart-store-keiko\project.log
+2025-11-29 15:45:INFO    AT cubing_campaign.py:41: THIS_DIR:            C:\Repos\smart-store-keiko\src\analytics_project\olap
+2025-11-29 15:45:INFO    AT cubing_campaign.py:42: PACKAGE_DIR:         C:\Repos\smart-store-keiko\src\analytics_project
+2025-11-29 15:45:INFO    AT cubing_campaign.py:43: SRC_DIR:             C:\Repos\smart-store-keiko\src
+2025-11-29 15:45:INFO    AT cubing_campaign.py:44: PROJECT_ROOT_DIR:    C:\Repos\smart-store-keiko
+2025-11-29 15:45:INFO    AT cubing_campaign.py:45: DATA_DIR:            C:\Repos\smart-store-keiko\data
+2025-11-29 15:45:INFO    AT cubing_campaign.py:46: WAREHOUSE_DIR:       C:\Repos\smart-store-keiko\data\dw
+2025-11-29 15:45:INFO    AT cubing_campaign.py:47: DB_PATH:             C:\Repos\smart-store-keiko\data\dw\smart_sales.db
+2025-11-29 15:45:INFO    AT cubing_campaign.py:48: OLAP_OUTPUT_DIR:     C:\Repos\smart-store-keiko\data\olap_cubing_outputs
+2025-11-29 15:45:INFO    AT cubing_campaign.py:49: RESULTS_OUTPUT_DIR:  C:\Repos\smart-store-keiko\data\results
+2025-11-29 15:45:INFO    AT cubing_campaign.py:203: Starting OLAP Cubing process...
+2025-11-29 15:45:INFO    AT cubing_campaign.py:76: Merged sales_df columns: ['sale_id', 'customer_id', 'product_id', 'store_id', 'campaign_id', 'sale_amount', 'sale_date', 'discount_percent', 'store_name', 'region_x', 'campaign_name', 'campaign_cost', 'product_name', 'category', 'unit_price', 'region', 'join_date', 'loyalty_points', 'engagement_style']
+2025-11-29 15:45:INFO    AT cubing_campaign.py:77: Sales + store + campaign + product + customer data successfully loaded from SQLite DW.
+2025-11-29 15:45:INFO    AT cubing_campaign.py:80: Sample regions in sales_df: ['North', 'East', 'South', 'South-West', 'Central']
+2025-11-29 15:45:INFO    AT cubing_campaign.py:145: Total ROI across all campaigns: 5.19%
+2025-11-29 15:45:INFO    AT cubing_campaign.py:169: Category-level ROI summary:
+2025-11-29 15:45:INFO    AT cubing_campaign.py:170: {'sale_amount': {'Clothing': 330768.19, 'Electronics': 309164.76, 'Home': 399772.6, 'Office': 327761.78}, 'campaign_cost': {'Clothing': 101650000.0, 'Electronics': 74450000.0, 'Home': 111650000.0, 'Office': 91100000.0}, 'roi': {'Clothing': -1.0, 'Electronics': -1.0, 'Home': -1.0, 'Office': -1.0}}
+2025-11-29 15:45:INFO    AT cubing_campaign.py:171: Cube columns after rename: ['Year', 'Month', 'region', 'campaign_name', 'category', 'store_name', 'sale_amount', 'sale_id', 'campaign_cost', 'monthly_cost', 'roi_monthly', 'cumulative_sales', 'roi_cumulative', 'roi', 'sale_count']
+2025-11-29 15:45:INFO    AT cubing_campaign.py:172: OLAP cube created with dimensions: ['Year', 'Month', 'region', 'campaign_name', 'category', 'store_name']
+2025-11-29 15:45:INFO    AT cubing_campaign.py:189: Attempting to write cube with shape: (1163, 15) and columns: ['Year', 'Month', 'region', 'campaign_name', 'category', 'store_name', 'sale_amount', 'sale_id', 'campaign_cost', 'monthly_cost', 'roi_monthly', 'cumulative_sales', 'roi_cumulative', 'roi', 'sale_count']
+2025-11-29 15:45:INFO    AT cubing_campaign.py:194: OLAP cube saved to C:\Repos\smart-store-keiko\data\olap_cubing_outputs\campaign_effectiveness.csv.
+2025-11-29 15:45:INFO    AT cubing_campaign.py:199: Write complete? File exists: True
+2025-11-29 15:45:INFO    AT cubing_campaign.py:222: OLAP Cubing process completed successfully.
+2025-11-29 15:45:INFO    AT cubing_campaign.py:223: Please see outputs in C:\Repos\smart-store-keiko\data\olap_cubing_outputs
+2025-11-29 15:45:INFO    AT cubing_campaign.py:224: Expected output: C:\Repos\smart-store-keiko\data\olap_cubing_outputs\campaign_effectiveness.csv
+2025-11-29 15:45:INFO    AT cubing_campaign.py:225: File exists after write: True

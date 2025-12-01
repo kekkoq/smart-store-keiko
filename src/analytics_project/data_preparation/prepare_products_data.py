@@ -157,12 +157,15 @@ def clean_products_data(input_file: str = "products_data.csv") -> pd.DataFrame:
     scrubber.standardize_column_names()
     scrubber.remove_duplicate_records(subset="product_id")
     scrubber.handle_missing_data(fill_value=0)
+
     # Clean specific columns
     scrubber.df = scrubber.df.replace([float("inf"), float("-inf")], 0)
+
     # Convert stock_level to integer
     scrubber.convert_column_type("stock_level", int)
     logger.info("Converted stock_level to integer format.")
-    # Fillter out unrealistic stock levels after conversion
+
+    # Filter out unrealistic stock levels after conversion
     scrubber.filter_outliers(
         "stock_level",
         min_val=0,

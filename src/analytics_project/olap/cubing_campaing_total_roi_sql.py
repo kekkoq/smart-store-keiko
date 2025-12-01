@@ -23,17 +23,18 @@ else:
     pysqldf = lambda q: sqldf(q, {"sales_df": sales_df})
 
     query = """
-    SELECT month,
-           campaign_name,
-           SUM(sale_amount) AS monthly_sales,
-           MAX(cumulative_sales) AS ytd_sales,
-           MAX(campaign_cost) AS campaign_cost,
-           MAX(roi_cumulative) AS cumulative_roi
-    FROM sales_df
-    WHERE month = 12
-    GROUP BY campaign_name
-    ORDER BY campaign_name
+   SELECT
+        SUM(sale_amount) AS total_sales,
+        SUM(campaign_cost_per_campaign) AS total_cost,
+        (SUM(sale_amount) - SUM(campaign_cost_per_campaign)) / SUM(campaign_cost_per_campaign) AS total_roi
+    FROM (
+        SELECT
+            campaign_name,
+            SUM(sale_amount) AS sale_amount,
+            MAX(campaign_cost) AS campaign_cost_per_campaign
+            FROM sales_df
+            GROUP BY campaign_name
+        ) AS campaign_summary;
     """
-
     results = pysqldf(query)
     print(results)

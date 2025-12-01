@@ -7,7 +7,7 @@ The project emphasizes key concepts in:
 - Data Warehousing: Structuring data for efficient querying and historical analysis
 - OLAP (Online Analytical Processing): Enabling multidimensional analysis for strategic decision support
 - Power BI: Visualizing KPIs and trends to inform business stakeholders
-- Apache Spark: Exploring distributed data processing for large-scale transformation tasks
+- Apache Spark (optional): Exploring distributed data processing for large-scale transformation tasks
 
 It introduces reproducible environment management using uv, ensuring consistency across development and deployment.
 
@@ -50,14 +50,6 @@ uv run python --version
 ```shell
 .\.venv\Scripts\activate
 ```
-
-**macOS / Linux / WSL:**
-
-```shell
-source .venv/bin/activate
-```
-
----
 
 ## WORKFLOW 3. Daily Workflow
 
@@ -273,10 +265,11 @@ Resolution Steps
 - Manually select interpreter for notebook
 - Open notebook (.ipynb)
 - Click kernel picker → choose:
+---
 
 ## P3: Data Cleaning with DataScrubber
 
-### 3.2 Data Scrubber Workflow
+### 3.1 Data Scrubber Workflow
 
 This project includes a modular data cleaning pipeline using the DataScrubber class, located in
 `src/analytics_project/data_preparation/data_scrubber.py`. The DataScrubber provides reusable
@@ -338,6 +331,7 @@ Method → Purpose
 - remove_negative_values → Removes rows where the specified column contains negative values.
 - convert_empty_strings_to_na → Converts empty strings into missing values (NaN).
 - override_invalid_dates → Replaces invalid or missing dates with a fixed default date.
+---
 
 ## P4 ETL Design Overview
 
@@ -401,6 +395,7 @@ Table: campaign
 
 ### 4.3 SQL Query example
 
+```
   In a py file:
   import sqlite3
   import pandas as pd
@@ -424,10 +419,10 @@ Table: campaign
   ORDER BY
       st.region, total_sales DESC
   """
-
   # Run the query and load into a DataFrame
   df = pd.read_sql_query(query, conn)
   print(df)
+  ```
 
 ![Total Sales by Region/Store](images/total_sales_by_region_store_sql.png)
 
@@ -442,11 +437,13 @@ Table: campaign
 Despite reinstalling the SQLite extension in Visual Studio Code, the expected interface features — such as the "Open Database" option in right-click context menu — did not appear. This prevented direct interaction with .db files through the extension UI.
 As a workaround, all SQL operations (including schema creation, data inspection, and joins) were executed using Python scripts via sqlite3 and pandas. This approach ensured full control over database interactions and reproducibility across environments.
 
- Workaround Strategy:
+Workaround Strategy:
 - SQL queries are embedded in Python scripts using cursor.execute() or pd.read_sql_query()
   - SQL Scripts are written in /dw_create/smart_sales_analysis.py.
 - Data validation and joins are tested using Python-based queries instead of relying on extension-based exploration
 This approach maintains full functionality and avoids reliance on potentially unstable IDE extensions.
+
+---
 
 ## P5 Power BI Integration - Dashboard Creation and Analysis
 
@@ -472,6 +469,7 @@ This approach maintains full functionality and avoids reliance on potentially un
 2. Dashboard and Analysis
 
   1. Total Sales by Month: trend analysis
+
   - Sales fluctuate significantly, with a peak in July and a sharp drop in September, suggesting seasonal or campaign-driven  dynamics.
   - Benchmark lines (e.g., 151K, 114K, 88K) help contextualize performance thresholds — possibly representing targets, averages, or historical baselines.
   - Average sales: $113,956; hightest sales: $135,093 - can be used as a target line for next campaign; lowest sales: $92,492 - may require to investigate the causes.
@@ -496,7 +494,7 @@ This approach maintains full functionality and avoids reliance on potentially un
 3. Sales Performance by Campaign, Product, and Channel (Region-Filtered View)
 
   Product Sales:
-  - Home products lead with 0.40M in sales, significantly outperforming all other categories.
+  Home products lead with 0.40M in sales, significantly outperforming all other categories.
    - Highest sales in East region (151k)
    - Indicates strong regional demand or effective campaign targeting for home-related items.
    - May justify prioritizing inventory and promotions in this category.
@@ -513,18 +511,19 @@ This approach maintains full functionality and avoids reliance on potentially un
 
 ### 5.4 Challenges
 
-- During cube building and Power BI integration, inconsistencies were discovered in the prepared datasets:
-  - Some product_id values in the sale table did not exist in the product dimension.
-  - Some customer_id values in the sale table did not exist in the customer dimension.
-  - When merged, these mismatches resulted in Unknown/Undefined values in the cube and dashboards.
-  - To resolve this, corrective logic was implemented in the ETL pipeline script (etl-to-dw.py) to ensure data integrity prior to Power BI loading.
-- This highlighted the importance of data validation and integrity checks during ETL and before OLAP cubing.
+During cube building and Power BI integration, inconsistencies were discovered in the prepared datasets:
+- Some product_id values in the sale table did not exist in the product dimension.
+- Some customer_id values in the sale table did not exist in the customer dimension.
+- When merged, these mismatches resulted in Unknown/Undefined values in the cube and dashboards.
+- To resolve this, corrective logic was implemented in the ETL pipeline script (etl-to-dw.py) to ensure data integrity prior to Power BI loading.
+This highlighted the importance of data validation and integrity checks during ETL and before OLAP cubing.
 
+---
 ## P6 BI Insights and Storytelling
 
 ### OLAP Project Workflow
 
-Section 1. The Business Goal
+### Section 1. The Business Goal
 
   Question:
   How effective is each sales campaign in delivering positive ROI?
@@ -538,7 +537,7 @@ Section 1. The Business Goal
   - Align marketing strategy with inventory and supply chain planning.
   - Strengthens collaboration between marketing, finance, and operations for overall business growth goals.
 
-Section 2. Data Source
+### Section 2. Data Source
 
   - Starting Point:
   A Database file (smart_sales.db) was populated through the ETL pipeline to ensure data is cleaned, transformed, and structured for analysis.
@@ -550,7 +549,7 @@ Section 2. Data Source
     - Customer: region
     - To merge dimension tables into sale table: product_id, customer_id
 
-Section 3. Tools
+### Section 3. Tools
 
   I chose Python to create a cube, then the script was visualized in Power BI to support slicing, dicing and drill-down.
 
@@ -562,7 +561,7 @@ Section 3. Tools
   - This pre-computed file reduces complexity in DAX and supports efficient slicing and benchmarking in Power BI without overloading the model.
   - Python scripts provide reproducibility, modularity, and flexibility for both exploratory analysis and dashboard-ready outputs.
 
-Section 4. Workflow & Logic - cubing_campaign.py
+### Section 4. Workflow & Logic - cubing_campaign.py
 
   Filing Structure:
 
@@ -586,11 +585,13 @@ Section 4. Workflow & Logic - cubing_campaign.py
        - Cumulative ROI = (cumulative sales – campaign cost) ÷ campaign cost.
        - Overall ROI = (sales – campaign cost) ÷ campaign cost.
        - Adds cumulative sales tracking per campaign.
-       -
+
   4. Export Results
      - Writes the OLAP cube to campaign_effectiveness.csv.
 
-Section 5. Results
+### Section 5. Results
+
+![Cumulative ROI](images/roi.png)
 
   Cumulative ROI Analysis (2025)
 
@@ -616,9 +617,9 @@ Section 5. Results
    - Monthly sales are inconsistent, with a spike in Month 10 (38K) but weak throughout the year.
    - likely needs reevaluation or repositioning.
 
-![Cumulative ROI](images/roi.png)
-
   Top 3 Best-Selling Products by units per store (Python visualization only)
+
+![Top 3 Best-Selling Products by Units per Store](images/top_three_products_per_store.png)
 
   Store-Level Insights:
 
@@ -638,9 +639,9 @@ Section 5. Results
   - Top Products: Desktop Computer, Air Fryer, Lawn Mower.
   - Consider seasonal campaigns (e.g., spring gardening, holiday tech deals).
 
-![Top 3 Best-Selling Products by Units per Store](images/top_three_products_per_store.png)
+  Top 5 Best-Selling Products - revenue drivers by Year, Quarter, Month (Drilldown)
 
-  Top 5 Best-Selling Products in sales amount by Year, Quarter, Month (Drill-Down)
+![Top 5 Best-Selling Products by Year, Quarter, Month](images/top_five_products.png)
 
   Key Insights:
    - iPhone Leads with 36.4K units sold in 2025. The iPhone is the clear top seller.
@@ -655,9 +656,7 @@ Section 5. Results
    - Standing Desk shows steady sales in Q1 to Q4, underperforming in Q2 and Q3.
      - This may be liked to consumer's priority shift or inventory lag.
 
-![Top 5 Best-Selling Products by Year, Quarter, Month](images/top_five_products.png)
-
-Section 6: Suggested Business Action
+### Section 6: Suggested Business Action
 
   1. Referral Incentives:
      - Expand this campaign into new customer demographics since it shows strong performance.
@@ -670,14 +669,88 @@ Section 6: Suggested Business Action
      - Review cost structure - marketing spend is too high?
      - Run customer surveys to obtain customer insights on this campaign.
 
-Section 7. Challenges
-
-Challenges for This Project
+### Section 7. Challenges
 
   - Despite earlier remediation efforts, the dataset still contained invalid and missing values.
   - To facilitate the analysis, I replaced several nonsensical product names with recognizable items (e.g., Dyson Vacuum, iPhone).
   - The Python campaign cubing script turned out to be incomplete. While building a visualization in Power BI, I discovered missing components that limited its ability to fully support the analysis. This required DAX Calculations in Power BI.
   - These measures allowed me to perform detail analysis such as campaign ROI variance and monthly sales comparisons.
+
+---
+## P7 Finalized BI Project
+
+### Section 1. The Business Goal
+
+Evaluate how effective each sales campaign is in delivering positive ROI. This ensures marketing spend is justified, highlights underperforming campaigns, creates benchmarks for future planning, supports segmentation and resource allocation, and aligns marketing with inventory, supply chain, and overall business growth.
+
+### Section 2. Data Source
+
+The project uses two complementary files. The first, smart_sales.db, is a SQLite database populated through the ETL pipeline and containing individual tables such as sale, product, and campaign. This structured warehouse ensures data is cleaned, validated, and query‑ready. The second file, campaign_effectiveness.csv, was generated through the Python pipeline by merging these dimension tables with the sales data and extracting only the necessary columns. This consolidated dataset facilitates campaign‑focused analysis and serves as the input for Power BI visualization.
+
+### Section 3. Tools Used
+
+In this project, Python scripts were employed to pre‑compute OLAP cubes, perform drill‑down and dicing operations, and ensure reproducibility and modularity in the analysis. The data was stored in SQLite (smart_sales.db), which served as the structured warehouse for querying, validation, and the creation of additional tables to support integration with Power BI. Finally, Power BI was used as the visualization layer, enabling interactive slicing, dicing, and drill‑down for stakeholders while reducing complexity in DAX by leveraging the pre‑computed outputs.
+
+### Section 4. Workflow & Logic
+
+The pipeline connects to smart_sales.db via ODBC, ingesting sales and dimension tables. Data is enriched with time attributes and merged into a unified dataset. Python scripts then build an OLAP cube, grouping by campaign, region, and time, and calculating ROI metrics (monthly, cumulative, overall). The cube is exported as campaign_effectiveness.csv, which is connected to Power BI for interactive slicing, dicing, and benchmarking.
+
+### Section 5. Results (visualizations + narrative)
+
+![1. Campaign Overview](images/campaign_overview.png)
+![2. Store Performance](images/store_performance.png)
+![3. Sales Overview](images/total_sales.png)
+![4. ROI Analysis](images/roi_analysis.png)
+
+The dashboard focuses on sales performance across four campaigns: Discount Bundle, Premium Upsell, Referral Incentives, and Rewards Program for 2025. The Total ROI across all campaigns is 5.19%, indicating modest overall efficiency.
+
+- Strong ROI Leaders: Referral Incentives campaign program shows high ROI (35.7%), indicating highly efficient spend-to-sales conversion. These campaigns are prime candidates for scaling or replication.
+- Underperformer Identified: Premium Upsell shows a negative ROI (-17.81%). Every month shows a negative gross profit, ranging from (-1K) to (-15K), suggesting misalignment between campaign cost and sales impact. This warrants reevaluation or redesign.
+- Rewards Program campaign shows a modest but positive ROI of 5.9% over the year.
+- Discount Bundle campaign hovers around the breakeven point, with a cumulative ROI of 0.76% over the year
+- Referral Incentives generated the highest sales across all categories — Home, Electronics, Clothing, and Office — consistently outperforming other campaigns. Rewards Program followed as the second-strongest contributor in each category.
+- The home products are the primary driver of sales revenue across all campaigns.
+- Regional Performance Highlights:
+  - In the East, Rewards Program performed highest (115K), with Referral Incentives also showing strength (100K).
+  - In the North, Referral Incentives again led (121K),
+  - In the South-West, Rewards Program topped the region (97K), slightly ahead of Referral Incentives (94K).
+  - In the West, Referral Incentives was the strongest performer (92K), while Rewards Program maintained solid traction (88K).
+
+Sales revenue and store performance highlights:
+- Store Performance: New York Uptown store is the top contributor to total sales, signaling strong market engagement in those areas. Regional targeting strategies may benefit from deeper segmentation here.
+- Product Impact: High-performing products such as Standing Desk, Dyson Vacuum, and iPhone dominate sales revenue, reinforcing their role as key drivers across campaigns. These should be prioritized in future bundles or promotions.
+- Temporal Trends: The line graph of monthly sales reveals fluctuations that may align with campaign launches or seasonal effects. This insight can guide timing strategies for future campaigns.
+- Dyson Vacuum and iPhone lead significantly in both sales revenue and unit volume.
+
+### Section 6. Suggested Business Action
+
+- Scale Referral Incentives: With a standout ROI of 35.7% and category-leading sales, this campaign is a prime candidate for expansion across more regions and product lines. Consider replicating its structure in underperforming areas or pairing it with high-impact products like Dyson Vacuum and iPhone.
+- Redesign Premium Upsell: The negative ROI (–17.81%) suggests poor cost-to-impact efficiency. Conduct a cost audit, reassess product positioning, and explore alternative upsell triggers (e.g., bundling with high-conversion items or targeting different customer segments).
+- Optimize Rewards Program: With a modest but positive ROI (5.9%) and consistent regional traction, this campaign is well-positioned for incremental improvements. Test enhanced reward tiers or seasonal boosts to lift engagement.
+- Reevaluate Discount Bundle: Hovering near breakeven (0.76% ROI), this campaign may benefit from targeted reconfiguration — such as adjusting discount thresholds, bundling with top-selling products, or limiting rollout to high-performing regions.
+- iPhone, Dyson Vacuum, and Standing Desk collectively drive over 100K in sales. These products should anchor future campaigns and receive priority in inventory planning to prevent stockouts and maximize ROI.
+
+Regional & Store-Level Actions
+- Prioritize East and North for Referral Incentives: These regions show strong alignment with the campaign’s value proposition. Consider doubling down on budget allocation, localized messaging, and influencer partnerships here.
+- Leverage South-West for Rewards Program: With 97K in sales, this region responds well to loyalty-driven incentives. Explore region-specific perks or cross-promotions with local partners.
+- Refine Segmentation in New York Uptown: As the top-performing store, this location warrants granular customer profiling and premium product testing. Use it as a pilot site for new bundles or campaign variants.
+
+### Section 7. Challenges
+
+- Data Limitations: The dataset lacked key fields (e.g., no sales quantity or product cost columns, discount percent not aligned with unit price), restricting deeper product‑level analysis such as gross profit ratio or discount impact.
+- Scope Constraints: Because fixing the dataset would require starting over, analysis was limited to available fields rather than comprehensive modeling.
+- Manual Adjustments: To improve realism, a handful of product names were manually changed. requiring extensive trial and error to find the most effective charts.
+- Pipeline Gaps: The Python OLAP pipeline did not include all necessary elements, so missing components had to be compensated with custom DAX measures in Power BI.
+- Unlike Excel or Tableau, Power BI visuals depend on model relationships and charts don't always behave intuitively,especially when dealing with non-additive metrics or complex filter contexts.. This was addressed by writing explicit DAX measures to define logic.
+
+### Section 8. Ethical Considerations
+
+- The underlying dataset is fictional thus insights may not fully represent real-world behavior.
+- Manual changes and override to the raw data should be documented.
+- Avoid overstating findings - ensure that visualizations don’t unintentionally bias interpretation.
+- Underperforming campaigns (like Premium Upsell) may reflect dataset constraints rather than true business inefficiency.
+- Do not penalize strategies based on incomplete or synthetic data.
+- Responsible Use of Analytics Tools.
 
 
 
