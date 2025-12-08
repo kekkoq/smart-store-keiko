@@ -205,9 +205,6 @@ $env:PYTHONPATH = "$PWD/src"
 pytest --cov=src --cov-report=term-missing
 
 ### 3.8 Logger Path Mapping
-Project Tree:
-
-![Project Path Setup](path_setup.png)
 
 How the Import Works
 - logger module lives in:
@@ -730,7 +727,7 @@ Sales revenue and store performance highlights:
 - Reevaluate Discount Bundle: Hovering near breakeven (0.76% ROI), this campaign may benefit from targeted reconfiguration — such as adjusting discount thresholds, bundling with top-selling products, or limiting rollout to high-performing regions.
 - iPhone, Dyson Vacuum, and Standing Desk collectively drive over 100K in sales. These products should anchor future campaigns and receive priority in inventory planning to prevent stockouts and maximize ROI.
 
-Regional & Store-Level Actions
+Regional & Store-Level Actions:
 - Prioritize East and North for Referral Incentives: These regions show strong alignment with the campaign’s value proposition. Consider doubling down on budget allocation, localized messaging, and influencer partnerships here.
 - Leverage South-West for Rewards Program: With 97K in sales, this region responds well to loyalty-driven incentives. Explore region-specific perks or cross-promotions with local partners.
 - Refine Segmentation in New York Uptown: As the top-performing store, this location warrants granular customer profiling and premium product testing. Use it as a pilot site for new bundles or campaign variants.
@@ -749,7 +746,7 @@ Regional & Store-Level Actions
 - Manual changes and override to the raw data should be documented.
 - Avoid overstating findings - ensure that visualizations don’t unintentionally bias interpretation.
 - Underperforming campaigns (like Premium Upsell) may reflect dataset constraints rather than true business inefficiency.
-- Do not penalize strategies based on incomplete or synthetic data.
+- Not to penalize strategies based on incomplete or synthetic data.
 - Responsible Use of Analytics Tools.
 
 
